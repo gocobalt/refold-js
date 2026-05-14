@@ -1,6 +1,6 @@
 {
   "name": "@cobaltio/cobalt-js",
-  "version": "9.2.0",
+  "version": "9.2.1",
   "description": "Cobalt frontend SDK",
   "main": "./cobalt.js",
   "typings": "./cobalt.d.ts",
