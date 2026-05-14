@@ -680,12 +680,14 @@ class Cobalt {
      * Returns the specified config.
      * @param {String} slug The application slug.
      * @param {String} [configId] The unique ID of the config.
+     * @param {Boolean} [excludeOptions] Whether to exclude the options from the fields in the response.
      * @returns {Promise<Config>} The specified config.
      */
-    async getConfig(slug: string, configId: string): Promise<Config> {
+    async getConfig(slug: string, configId: string, excludeOptions?: boolean): Promise<Config> {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}`, {
             headers: {
                 authorization: `Bearer ${this.token}`,
+                ...(excludeOptions ? { disable_field_options: "true" } : {}),
             },
         });
 
@@ -863,7 +865,7 @@ class Cobalt {
             const value = rest[key];
             if (value !== undefined && value !== "") query.set(key, String(value));
         }
-        
+
         const res = await fetch(`${this.baseUrl}/api/v2/public/workflow?${query}`, {
             headers: {
                 authorization: `Bearer ${this.token}`,
