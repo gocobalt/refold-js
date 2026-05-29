@@ -115,3 +115,13 @@ All requests include `Authorization: Bearer ${token}`:
 - **v9.x:** Added `getWorkflowPayload()`, `executeWorkflow()`, multi-auth support
 - **v8.x:** Introduced `AuthType` enum for multi-auth
 - Deprecated fields maintained for backward compatibility
+
+## Claude Code Skills
+
+All development using Claude Code must use the superpowers skills plugin. Required before every task:
+
+- **Before building features or components:** invoke `superpowers:brainstorming` to explore intent and design first
+- **Before multi-step implementation:** invoke `superpowers:writing-plans` — this saves a plan to `docs/superpowers/plans/`
+- **Before claiming work is done:** invoke `superpowers:verification-before-completion` before committing or opening a PR
+
+For feature work (`feat/*` branches), include the plan file from `docs/superpowers/plans/` in the PR. PRs without a plan file for feature branches will receive a warning from the PR validation bot.

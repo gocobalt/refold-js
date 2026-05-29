@@ -1,0 +1,224 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [uat]
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  pr-validation:
+    name: pr-validation
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Validate PR template
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr     = context.payload.pull_request;
+            const title  = pr.title || '';
+            const body   = pr.body  || '';
+            const labels = pr.labels.map(l => l.name);
+            const isHotfix = labels.includes('hotfix');
+
+            const errors   = [];
+            const warnings = [];
+
+            function section(heading) {
+              const esc = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const re  = new RegExp(`#{1,6}\\s+${esc}\\s*\\n([\\s\\S]*?)(?=\\n#{1,6}\\s|$)`, 'i');
+              const m   = body.match(re);
+              if (!m) return null;
+              return m[1].replace(/<!--[\s\\S]*?-->/g, '').trim();
+            }
+
+            if (isHotfix) {
+              warnings.push(
+                'This PR is labelled **hotfix** — template checks skipped. ' +
+                'Tests are still required.'
+              );
+            } else {
+              const titleRe = /^(feat|fix|chore|refactor|build|perf|breaking|docs|internal)(\(.+\))?: .{3,}/;
+              const isInternal = /^internal(\(.+\))?:/.test(title);
+              if (!titleRe.test(title)) {
+                errors.push(
+                  '**Title format** — must match `type(scope): short description`\n' +
+                  '  Valid types: `feat` `fix` `chore` `refactor` `build` `perf` `breaking` `docs` `internal`\n' +
+                  '  Example: `fix(auth): resolve token expiry on refresh`\n' +
+                  '  Use `internal` for tooling/process PRs that have no Linear ticket\n' +
+                  `  Got: \`${title}\``
+                );
+              }
+
+              const summary = section('Summary') || '';
+              if (summary.length < 20) {
+                errors.push(
+                  `**Summary** — must be at least 20 characters (got ${summary.length})`
+                );
+              }
+
+              if (!isInternal && !/^\w+\s+[A-Z]+-\d+\b|^[A-Z]+-\d+\b/m.test(body)) {
+                errors.push(
+                  '**Linear ticket** — a valid ticket ID must appear on its own line in the PR body\n' +
+                  '  Valid formats: `DEV-123`, `closes DEV-123`, `resolves AIA-456`, `fixes DEV-789`\n' +
+                  '  If there is no ticket, use `internal` as the title type to skip this check'
+                );
+              }
+
+              const testPlan = section('Test Plan') || '';
+              if (!/- \[ \] .+/.test(testPlan)) {
+                errors.push(
+                  '**Test Plan** — must include at least one step with text, e.g. `- [ ] Navigate to X and verify Y`'
+                );
+              }
+
+              let prFiles = [];
+              try {
+                const { data: files } = await github.rest.pulls.listFiles({
+                  owner:       context.repo.owner,
+                  repo:        context.repo.repo,
+                  pull_number: pr.number,
+                  per_page:    100,
+                });
+                prFiles = files;
+              } catch (e) {
+                core.warning(`Could not list PR files: ${e.message}`);
+              }
+
+              const needsPlan = /^(feat|refactor|breaking)(\(.+\))?:/.test(title);
+              const hasPlanFile = prFiles.some(f =>
+                f.filename.startsWith('docs/superpowers/plans/') ||
+                f.filename.startsWith('docs/superpowers/specs/')
+              );
+              if (needsPlan && !hasPlanFile) {
+                warnings.push(
+                  '**Superpowers plan file missing** — feature PRs should include a plan file in `docs/superpowers/plans/`.\n' +
+                  '  Run `superpowers:brainstorming` + `superpowers:writing-plans` in Claude Code before implementing.\n' +
+                  '  If you intentionally skipped planning (trivial change), you can ignore this warning.'
+                );
+              }
+
+              const envPatterns = [
+                /\.env(\.|$)/i,
+                /(^|\/)\.env$/i,
+                /(^|\/)env\//i,
+                /(^|\/)config\//i,
+                /helm\/.*values.*\.ya?ml$/i,
+                /docker-compose.*\.ya?ml$/i,
+                /kubernetes\/.*\.ya?ml$/i,
+                /k8s\/.*\.ya?ml$/i,
+              ];
+              const touchesEnvFiles = prFiles.some(f =>
+                envPatterns.some(p => p.test(f.filename))
+              );
+
+              if (touchesEnvFiles) {
+                const envSection = section('Env Changes') || '';
+                const hasContent =
+                  /none/i.test(envSection) ||
+                  /- name:\s*\S+/.test(envSection);
+                if (!hasContent) {
+                  errors.push(
+                    '**Env Changes** — this PR modifies config/env files but ' +
+                    'the Env Changes section is empty.\n' +
+                    '  Document all env variable changes, or write `none` if no variables changed.'
+                  );
+                }
+              }
+            }
+
+            const MARKER = '<!-- pr-validation-bot -->';
+            if (errors.length > 0 || warnings.length > 0) {
+              const lines = [MARKER];
+              if (isHotfix) {
+                lines.push('### ⚠️ PR Validation — Hotfix Mode');
+                lines.push('');
+                warnings.forEach(w => lines.push(`> ${w}`));
+              } else {
+                if (errors.length > 0) {
+                  lines.push('### ⚠️ PR Validation Failed');
+                  lines.push('');
+                  lines.push(
+                    `The following ${errors.length === 1 ? 'field requires' : `${errors.length} fields require`} attention:`
+                  );
+                  lines.push('');
+                  errors.forEach(e => lines.push(`- ${e}`));
+                  lines.push('');
+                  lines.push('_Fix the above and the check will re-run automatically._');
+                }
+                if (warnings.length > 0) {
+                  if (errors.length > 0) lines.push('');
+                  lines.push(errors.length > 0 ? '### ⚠️ Warnings' : '### ⚠️ PR Validation — Warnings');
+                  lines.push('');
+                  warnings.forEach(w => lines.push(`> ${w}`));
+                  lines.push('');
+                  lines.push('_Warnings will not fail the check — address them if applicable._');
+                }
+              }
+
+              const commentBody = lines.join('\n');
+              const { data: comments } = await github.rest.issues.listComments({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: pr.number,
+              });
+              const existing = comments.find(
+                c => c.user.type === 'Bot' && c.body.includes(MARKER)
+              );
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner:      context.repo.owner,
+                  repo:       context.repo.repo,
+                  comment_id: existing.id,
+                  body:       commentBody,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner:        context.repo.owner,
+                  repo:         context.repo.repo,
+                  issue_number: pr.number,
+                  body:         commentBody,
+                });
+              }
+            }
+
+            if (errors.length > 0) {
+              core.setFailed(
+                `PR validation failed — ${errors.length} field(s) need attention. ` +
+                `See PR comment for details.`
+              );
+            }
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BRANCH: ${{ github.head_ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          payload=$(jq -n \
+            --arg url    "$PR_URL" \
+            --arg number "$PR_NUMBER" \
+            --arg title  "$PR_TITLE" \
+            --arg branch "$PR_BRANCH" \
+            --arg author "$PR_AUTHOR" \
+            '{
+              text: ":warning: *PR Validation Failed* — cobalt-js",
+              attachments: [{
+                color: "warning",
+                fields: [
+                  { title: "PR",     value: ("<" + $url + "|#" + $number + " " + $title + ">"), short: false },
+                  { title: "Branch", value: ("`" + $branch + "`"), short: true },
+                  { title: "Author", value: $author, short: true }
+                ]
+              }]
+            }')
+          curl -s -X POST "$SLACK_WEBHOOK" \
+            -H "Content-Type: application/json" \
+            -d "$payload"
