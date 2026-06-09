@@ -477,9 +477,10 @@ declare class Cobalt {
      * Returns the specified config.
      * @param {String} slug The application slug.
      * @param {String} [configId] The unique ID of the config.
+     * @param {Boolean} [excludeOptions] Whether to exclude the options from the fields in the response.
      * @returns {Promise<Config>} The specified config.
      */
-    getConfig(slug: string, configId: string): Promise<Config>;
+    getConfig(slug: string, configId: string, excludeOptions?: boolean): Promise<Config>;
     /**
      * Update the specified config.
      * @param {UpdateConfigPayload} payload The update payload.

@@ -314,12 +314,14 @@ class Cobalt {
      * Returns the specified config.
      * @param {String} slug The application slug.
      * @param {String} [configId] The unique ID of the config.
+     * @param {Boolean} [excludeOptions] Whether to exclude the options from the fields in the response.
      * @returns {Promise<Config>} The specified config.
      */
-    async getConfig(slug, configId) {
+    async getConfig(slug, configId, excludeOptions) {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}`, {
             headers: {
                 authorization: `Bearer ${this.token}`,
+                ...(excludeOptions ? { disable_field_options: "true" } : {}),
             },
         });
         if (res.status >= 400 && res.status < 600) {
