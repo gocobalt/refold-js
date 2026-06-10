@@ -12,6 +12,22 @@ export enum AuthStatus {
     Expired = "expired",
 }
 
+/** A connected account for an application. */
+export interface ConnectedAccount {
+    /** The unique identifier for this connected account. */
+    connection_id: string;
+    /** The identifier of the auth config. */
+    auth_config_id: string;
+    /** The identifier (username, email, etc.) of the connected account. */
+    identifier: unknown;
+    /** The auth type used to connect the account. */
+    auth_type: AuthType;
+    /** The timestamp at which the account was connected. */
+    connectedAt: string;
+    /** The current status of the connection. */
+    status?: AuthStatus;
+}
+
 /** An application in Cobalt. */
 export interface Application {
     /** Application ID */
@@ -37,16 +53,7 @@ export interface Application {
         [key in AuthType]: InputField[];
     };
     /** The list of connected accounts for this application */
-    connected_accounts?: {
-        /** The identifier (username, email, etc.) of the connected account. */
-        identifier: unknown;
-        /** The auth type used to connect the account. */
-        auth_type: AuthType;
-        /** The timestamp at which the account was connected. */
-        connectedAt: string;
-        /** The current status of the connection. */
-        status?: AuthStatus;
-    }[];
+    connected_accounts?: ConnectedAccount[];
     /**
      * The type of auth used by application.
      * @deprecated Check `auth_type_options` and `connected_accounts` for multiple auth types support.
@@ -67,6 +74,17 @@ export interface Application {
      * @deprecated Check `auth_type_options` for multiple auth types support.
      */
     auth_input_map?: InputField[];
+}
+
+export interface AuthConfig {
+    /** The auth config ID. */
+    _id: string;
+    /** The display name of the auth config. */
+    name: string;
+    /** The description of the auth config. */
+    description?: string;
+    /** Whether the auth config is the default auth config for the application. */
+    is_default?: boolean;
 }
 
 /** An Input field to take input from the user. */
@@ -90,6 +108,26 @@ export interface InputField  {
         name?: string;
         value: string;
     }[];
+}
+
+export interface OAuthParams {
+    /** The application slug. */
+    slug: string;
+    /** The identifier of the auth config. */
+    authConfig?: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
+    /** Whether to close the authentication window automatically. */
+    autoClose?: boolean;
+}
+
+export interface KeyBasedParams {
+    /** The application slug. */
+    slug: string;
+    /** The identifier of the auth config. */
+    authConfig?: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
 }
 
 /** The payload object for config. */
@@ -483,15 +521,46 @@ class Cobalt {
     }
 
     /**
+     * Returns the auth configs for the specified application.
+     * @param {String} slug The application slug.
+     * @returns {Promise<AuthConfig[]>} The auth configs.
+     */
+    public async getAuthConfigs(slug: string): Promise<AuthConfig[]> {
+        const res = await fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/auth-config`, {
+            headers: {
+                authorization: `Bearer ${this.token}`,
+            },
+        });
+
+        if (res.status >= 400 && res.status < 600) {
+            const error = await res.json();
+            throw error;
+        }
+
+        const data = await res.json();
+        return data.docs || [];
+    }
+
+    /**
      * Returns the auth URL that users can use to authenticate themselves to the
      * specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param {OAuthParams} params The OAuth parameters.
      * @returns {Promise<String>} The auth URL where users can authenticate themselves.
      */
-    private async getOAuthUrl(slug: string, params?: Record<string, string>): Promise<string> {
-        const res = await fetch(`${this.baseUrl}/api/v1/${slug}/integrate?${new URLSearchParams(params).toString()}`, {
+    private async getOAuthUrl({
+        slug,
+        authConfig,
+        payload,
+    }: OAuthParams): Promise<string> {
+        const queryParams = new URLSearchParams();
+        if (authConfig) queryParams.append("auth_config_id", authConfig);
+        if (typeof payload === "object") {
+            for (const [ key, value ] of Object.entries(payload)) {
+                queryParams.append(key, value);
+            }
+        }
+        const res = await fetch(`${this.baseUrl}/api/v1/${slug}/integrate?${queryParams.toString()}`, {
             headers: {
                 authorization: `Bearer ${this.token}`,
             },
@@ -509,13 +578,17 @@ class Cobalt {
     /**
      * Handle OAuth for the specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param {OAuthParams} params The OAuth parameters.
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
-    private async oauth(slug: string, params?: Record<string, string>): Promise<boolean> {
+    private async oauth({
+        slug,
+        authConfig,
+        payload,
+        autoClose = true,
+    }: OAuthParams): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            this.getOAuthUrl(slug, params)
+            this.getOAuthUrl({ slug, authConfig, payload })
             .then(oauthUrl => {
                 const connectWindow = window.open(oauthUrl);
 
@@ -523,9 +596,10 @@ class Cobalt {
                 const interval = setInterval(() => {
                     this.getApp(slug)
                     .then(app => {
-                        if (app && app.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active)) {
+                        const oauthAccounts = app.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2 && a.status !== AuthStatus.Expired);
+                        if (app && oauthAccounts?.some(a => authConfig ? a.auth_config_id === authConfig : true)) {
                             // close auth window
-                            connectWindow && connectWindow.close();
+                            if (autoClose) connectWindow && connectWindow.close();
                             // clear interval
                             clearInterval(interval);
                             // resovle status
@@ -554,12 +628,15 @@ class Cobalt {
 
     /**
      * Save auth data for the specified keybased application.
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [payload] The key value pairs of auth data.
+     * @param {KeyBasedParams} params The key based parameters.
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
-    private async keybased(slug: string, payload?: Record<string, string>): Promise<boolean> {
-        const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
+    private async keybased({
+        slug,
+        authConfig,
+        payload,
+    }: KeyBasedParams): Promise<boolean> {
+        const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save?auth_config_id=${authConfig}`, {
             method: "POST",
             headers: {
                 authorization: `Bearer ${this.token}`,
@@ -583,28 +660,34 @@ class Cobalt {
      * Connects the specified application using the provided authentication type and optional auth data.
      * @param params - The parameters for connecting the application.
      * @param params.slug - The application slug.
+     * @param params.authConfig - The identifier of the auth config.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
     public async connect({
         slug,
+        authConfig,
         type,
         payload,
+        autoClose = true,
     }: {
         slug: string;
+        authConfig?: string;
         type?: AuthType;
         payload?: Record<string, string>;
+        autoClose?: boolean;
     }): Promise<boolean> {
         switch (type) {
             case AuthType.OAuth2:
-                return this.oauth(slug, payload);
+                return this.oauth({ slug, authConfig, payload, autoClose });
             case AuthType.KeyBased:
-                return this.keybased(slug, payload);
+                return this.keybased({ slug, authConfig, payload });
             default:
-                if (payload) return this.keybased(slug, payload);
-                return this.oauth(slug);
+                if (payload) return this.keybased({ slug, authConfig, payload });
+                return this.oauth({ slug, authConfig });
         }
     }
 
@@ -612,10 +695,15 @@ class Cobalt {
      * Disconnect the specified application and remove any associated data from Cobalt.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
+     * @param {String} [authConfig] The identifier of the auth config.
      * @returns {Promise<unknown>}
      */
-    public async disconnect(slug: string, type?: AuthType): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
+    public async disconnect(slug: string, type?: AuthType, authConfig?: string): Promise<unknown> {
+        const queryParams = new URLSearchParams();
+        if (type) queryParams.append("auth_type", type);
+        if (authConfig) queryParams.append("auth_config_id", authConfig);
+
+        const res = await fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}?${queryParams.toString()}`, {
             method: "DELETE",
             headers: {
                 authorization: `Bearer ${this.token}`,

@@ -30,6 +30,14 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-      - run: npm publish
+      - name: Set npm tag
+        id: tag
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            echo "tag=beta" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+      - run: npm publish --tag ${{ steps.tag.outputs.tag }}
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

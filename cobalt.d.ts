@@ -9,6 +9,21 @@ export declare enum AuthStatus {
     Active = "active",
     Expired = "expired"
 }
+/** A connected account for an application. */
+export interface ConnectedAccount {
+    /** The unique identifier for this connected account. */
+    connection_id: string;
+    /** The identifier of the auth config. */
+    auth_config_id: string;
+    /** The identifier (username, email, etc.) of the connected account. */
+    identifier: unknown;
+    /** The auth type used to connect the account. */
+    auth_type: AuthType;
+    /** The timestamp at which the account was connected. */
+    connectedAt: string;
+    /** The current status of the connection. */
+    status?: AuthStatus;
+}
 /** An application in Cobalt. */
 export interface Application {
     /** Application ID */
@@ -33,16 +48,7 @@ export interface Application {
         [key in AuthType]: InputField[];
     };
     /** The list of connected accounts for this application */
-    connected_accounts?: {
-        /** The identifier (username, email, etc.) of the connected account. */
-        identifier: unknown;
-        /** The auth type used to connect the account. */
-        auth_type: AuthType;
-        /** The timestamp at which the account was connected. */
-        connectedAt: string;
-        /** The current status of the connection. */
-        status?: AuthStatus;
-    }[];
+    connected_accounts?: ConnectedAccount[];
     /**
      * The type of auth used by application.
      * @deprecated Check `auth_type_options` and `connected_accounts` for multiple auth types support.
@@ -63,6 +69,16 @@ export interface Application {
      * @deprecated Check `auth_type_options` for multiple auth types support.
      */
     auth_input_map?: InputField[];
+}
+export interface AuthConfig {
+    /** The auth config ID. */
+    _id: string;
+    /** The display name of the auth config. */
+    name: string;
+    /** The description of the auth config. */
+    description?: string;
+    /** Whether the auth config is the default auth config for the application. */
+    is_default?: boolean;
 }
 /** An Input field to take input from the user. */
 export interface InputField {
@@ -85,6 +101,24 @@ export interface InputField {
         name?: string;
         value: string;
     }[];
+}
+export interface OAuthParams {
+    /** The application slug. */
+    slug: string;
+    /** The identifier of the auth config. */
+    authConfig?: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
+    /** Whether to close the authentication window automatically. */
+    autoClose?: boolean;
+}
+export interface KeyBasedParams {
+    /** The application slug. */
+    slug: string;
+    /** The identifier of the auth config. */
+    authConfig?: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
 }
 /** The payload object for config. */
 export interface ConfigPayload {
@@ -373,26 +407,29 @@ declare class Cobalt {
      */
     getApps(): Promise<Application[]>;
     /**
+     * Returns the auth configs for the specified application.
+     * @param {String} slug The application slug.
+     * @returns {Promise<AuthConfig[]>} The auth configs.
+     */
+    getAuthConfigs(slug: string): Promise<AuthConfig[]>;
+    /**
      * Returns the auth URL that users can use to authenticate themselves to the
      * specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param {OAuthParams} params The OAuth parameters.
      * @returns {Promise<String>} The auth URL where users can authenticate themselves.
      */
     private getOAuthUrl;
     /**
      * Handle OAuth for the specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param {OAuthParams} params The OAuth parameters.
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     private oauth;
     /**
      * Save auth data for the specified keybased application.
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [payload] The key value pairs of auth data.
+     * @param {KeyBasedParams} params The key based parameters.
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
     private keybased;
@@ -400,23 +437,28 @@ declare class Cobalt {
      * Connects the specified application using the provided authentication type and optional auth data.
      * @param params - The parameters for connecting the application.
      * @param params.slug - The application slug.
+     * @param params.authConfig - The identifier of the auth config.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
-    connect({ slug, type, payload, }: {
+    connect({ slug, authConfig, type, payload, autoClose, }: {
         slug: string;
+        authConfig?: string;
         type?: AuthType;
         payload?: Record<string, string>;
+        autoClose?: boolean;
     }): Promise<boolean>;
     /**
      * Disconnect the specified application and remove any associated data from Cobalt.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
+     * @param {String} [authConfig] The identifier of the auth config.
      * @returns {Promise<unknown>}
      */
-    disconnect(slug: string, type?: AuthType): Promise<unknown>;
+    disconnect(slug: string, type?: AuthType, authConfig?: string): Promise<unknown>;
     /**
      * Returns the specified config, or creates one if it doesn't exist.
      * @param {ConfigPayload} payload The payload object for config.
