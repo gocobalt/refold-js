@@ -380,15 +380,19 @@ class Cobalt {
      * @param {String} slug The application slug.
      * @param {String} fieldId The unique ID of the field.
      * @param {String} [workflowId] The unique ID of the workflow.
+     * @param {Record<string, unknown>} [payload] The payload to be sent in the request body.
      * @returns {Promise<Field>} The specified config field.
      */
-    getConfigField(slug, fieldId, workflowId) {
+    getConfigField(slug, fieldId, workflowId, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
+                method: "POST",
                 headers: {
                     authorization: `Bearer ${this.token}`,
+                    "content-type": "application/json",
                     slug,
                 },
+                body: JSON.stringify(payload || {}),
             });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();

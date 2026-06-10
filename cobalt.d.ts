@@ -457,9 +457,10 @@ declare class Cobalt {
      * @param {String} slug The application slug.
      * @param {String} fieldId The unique ID of the field.
      * @param {String} [workflowId] The unique ID of the workflow.
+     * @param {Record<string, unknown>} [payload] The payload to be sent in the request body.
      * @returns {Promise<Field>} The specified config field.
      */
-    getConfigField(slug: string, fieldId: string, workflowId?: string): Promise<Config>;
+    getConfigField(slug: string, fieldId: string, workflowId?: string, payload?: Record<string, unknown>): Promise<Config>;
     /**
      * Update the specified config field value.
      * @param {String} slug The application slug.
