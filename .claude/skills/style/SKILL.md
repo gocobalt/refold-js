@@ -41,14 +41,14 @@ These conventions apply to all code written in this codebase. Follow them when c
 ## SDK-Specific Conventions
 
 - **Zero dependencies:** This SDK has no runtime dependencies. Do not add any. Use native `fetch` API.
-- **Single class:** All public API lives on the `Cobalt` class. Keep it that way.
+- **Single class:** All public API lives on the `Refold` class. Keep it that way.
 - **Backward compatibility:** Mark deprecated fields/methods with `@deprecated` JSDoc tag — never remove them without a major version bump
 - **Error propagation:** Throw parsed JSON error responses for 4xx/5xx — don't catch and transform in the SDK. Let consumers handle errors.
 - **JSDoc on all public methods:** Every public method must have a JSDoc block with `@param` and `@returns` tags. This generates the TypeDoc documentation.
 
 ## Functions
 
-- **Method style:** Use class methods for the `Cobalt` class
+- **Method style:** Use class methods for the `Refold` class
 - **Private methods:** Mark with `private` keyword — `private oauth(...)`, `private keybased(...)`
 - **Async/await:** All API calls are async — use `async`/`await`, never raw `.then()` chains in new code
 - **Early returns:** Prefer early returns to reduce nesting

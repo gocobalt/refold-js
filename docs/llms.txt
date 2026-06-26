@@ -1,20 +1,20 @@
-**@cobaltio/cobalt-js**
+**@refoldai/refold-js**
 
 ***
 
-# Cobalt Javascript SDK
-Cobalt frontend SDK.
+# Refold Javascript SDK
+Refold frontend SDK.
 
 ## Install
 
 #### npm
 ```bash
-npm install @cobaltio/cobalt-js
+npm install @refoldai/refold-js
 ```
 
 #### yarn
 ```bash
-yarn add @cobaltio/cobalt-js
+yarn add @refoldai/refold-js
 ```
 
 ## Usage
@@ -26,43 +26,43 @@ yarn add @cobaltio/cobalt-js
 <!-- use this if you get an error saying `exports` is not defined. -->
 <script>var exports = {};</script>
 <!-- use a specific version -->
-<script src="https://cdn.jsdelivr.net/npm/@cobaltio/cobalt-js@8.0.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@refoldai/refold-js@10.0.0"></script>
 <!-- use a version range instead of a specific version -->
-<script src="https://cdn.jsdelivr.net/npm/@cobaltio/cobalt-js@8"></script>
-<script src="https://cdn.jsdelivr.net/npm/@cobaltio/cobalt-js@8.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@refoldai/refold-js@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/@refoldai/refold-js@10.0"></script>
 <!-- omit the version completely to use the latest one -->
 <!-- you should NOT use this in production -->
-<script src="https://cdn.jsdelivr.net/npm/@cobaltio/cobalt-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@refoldai/refold-js"></script>
 ```
 
 #### Node
 ```js
-import { Cobalt } from "@cobaltio/cobalt-js";
+import { Refold } from "@refoldai/refold-js";
 // or, if you're using CommonJS
-const { Cobalt } = require("@cobaltio/cobalt-js");
+const { Refold } = require("@refoldai/refold-js");
 ```
 
 ### Initialize
 ```js
 // initialize with token
-const cobalt = new Cobalt({
-    // the token you generate for linked accounts using the cobalt backend SDK
-    token: "COBALT_SESSION_TOKEN",
-    // OPTIONAL: set custom base url for all API requests. only useful if you are hosting Cobalt on premise.
-    baseUrl: "https://cobalt.example.com/backend",
+const refold = new Refold({
+    // the token you generate for linked accounts using the Refold backend SDK
+    token: "REFOLD_SESSION_TOKEN",
+    // OPTIONAL: set custom base url for all API requests. only useful if you are hosting Refold on premise.
+    baseUrl: "https://refold.example.com/backend",
 });
 
 // Or, initialize without token
-const cobalt = new Cobalt();
+const refold = new Refold();
 // and you can set the token later.
-cobalt.token = "COBALT_SESSION_TOKEN";
+refold.token = "REFOLD_SESSION_TOKEN";
 ```
 
 # Documentation
 
-- You can read the [SDK documentation here](https://gocobalt.github.io/cobalt-js).
+- You can read the [SDK documentation here](https://gocobalt.github.io/refold-js).
 
-- [`llms.txt`](https://gocobalt.github.io/cobalt-js/llms.txt)
+- [`llms.txt`](https://gocobalt.github.io/refold-js/llms.txt)
 
   This documentation is also available in [llms.txt](https://llmstxt.org) format, which is a simple markdown standard that LLMs can consume easily.
 
@@ -70,61 +70,61 @@ cobalt.token = "COBALT_SESSION_TOKEN";
 
 ### AuthStatus
 
-Defined in: [cobalt.ts:10](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L10)
+Defined in: [refold.ts:10](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L10)
 
 #### Enumeration Members
 
 | Enumeration Member | Value | Defined in |
 | ------ | ------ | ------ |
-| <a id="enumeration-member-active"></a> `Active` | `"active"` | [cobalt.ts:11](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L11) |
-| <a id="enumeration-member-expired"></a> `Expired` | `"expired"` | [cobalt.ts:12](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L12) |
+| <a id="enumeration-member-active"></a> `Active` | `"active"` | [refold.ts:11](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L11) |
+| <a id="enumeration-member-expired"></a> `Expired` | `"expired"` | [refold.ts:12](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L12) |
 
 ***
 
 ### AuthType
 
-Defined in: [cobalt.ts:5](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L5)
+Defined in: [refold.ts:5](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L5)
 
-Cobalt Frontend SDK
+Refold Frontend SDK
 
 #### Enumeration Members
 
 | Enumeration Member | Value | Defined in |
 | ------ | ------ | ------ |
-| <a id="enumeration-member-keybased"></a> `KeyBased` | `"keybased"` | [cobalt.ts:7](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L7) |
-| <a id="enumeration-member-oauth2"></a> `OAuth2` | `"oauth2"` | [cobalt.ts:6](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L6) |
+| <a id="enumeration-member-keybased"></a> `KeyBased` | `"keybased"` | [refold.ts:7](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L7) |
+| <a id="enumeration-member-oauth2"></a> `OAuth2` | `"oauth2"` | [refold.ts:6](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L6) |
 
 ## Classes
 
-### Cobalt
+### Refold
 
-Defined in: [cobalt.ts:364](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L364)
+Defined in: [refold.ts:364](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L364)
 
 #### Constructors
 
 ##### Constructor
 
-> **new Cobalt**(`options?`): [`Cobalt`](#cobalt)
+> **new Refold**(`options?`): [`Refold`](#refold)
 
-Defined in: [cobalt.ts:374](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L374)
+Defined in: [refold.ts:374](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L374)
 
-Cobalt Frontend SDK
+Refold Frontend SDK
 
 ###### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | [`CobaltOptions`](#cobaltoptions) | The options to configure the Cobalt SDK. |
+| `options` | [`RefoldOptions`](#refoldoptions) | The options to configure the Refold SDK. |
 
 ###### Returns
 
-[`Cobalt`](#cobalt)
+[`Refold`](#refold)
 
 #### Properties
 
 | Property | Modifier | Type | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="token"></a> `token` | `public` | `string` | [cobalt.ts:366](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L366) |
+| <a id="token"></a> `token` | `public` | `string` | [refold.ts:366](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L366) |
 
 #### Methods
 
@@ -132,7 +132,7 @@ Cobalt Frontend SDK
 
 > **config**(`payload`): `Promise`\<[`Config`](#config-1)\>
 
-Defined in: [cobalt.ts:638](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L638)
+Defined in: [refold.ts:638](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L638)
 
 Returns the specified config, or creates one if it doesn't exist.
 
@@ -152,7 +152,7 @@ The specified config.
 
 > **connect**(`params`): `Promise`\<`boolean`\>
 
-Defined in: [cobalt.ts:591](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L591)
+Defined in: [refold.ts:591](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L591)
 
 Connects the specified application using the provided authentication type and optional auth data.
 
@@ -179,7 +179,7 @@ Throws an error if the authentication type is invalid or the connection fails.
 
 > **createWorkflow**(`params`): `Promise`\<[`PublicWorkflow`](#publicworkflow)\>
 
-Defined in: [cobalt.ts:896](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L896)
+Defined in: [refold.ts:896](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L896)
 
 Create a public workflow for the linked account.
 
@@ -199,7 +199,7 @@ The created public workflow.
 
 > **deleteConfig**(`slug`, `configId?`): `Promise`\<`unknown`\>
 
-Defined in: [cobalt.ts:731](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L731)
+Defined in: [refold.ts:731](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L731)
 
 Delete the specified config.
 
@@ -218,7 +218,7 @@ Delete the specified config.
 
 > **deleteConfigField**(`slug`, `fieldId`, `workflowId?`): `Promise`\<`unknown`\>
 
-Defined in: [cobalt.ts:808](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L808)
+Defined in: [refold.ts:808](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L808)
 
 Delete the specified config field value.
 
@@ -238,7 +238,7 @@ Delete the specified config field value.
 
 > **deleteWorkflow**(`workflowId`): `Promise`\<`unknown`\>
 
-Defined in: [cobalt.ts:924](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L924)
+Defined in: [refold.ts:924](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L924)
 
 Delete the specified public workflow.
 
@@ -256,9 +256,9 @@ Delete the specified public workflow.
 
 > **disconnect**(`slug`, `type?`): `Promise`\<`unknown`\>
 
-Defined in: [cobalt.ts:617](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L617)
+Defined in: [refold.ts:617](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L617)
 
-Disconnect the specified application and remove any associated data from Cobalt.
+Disconnect the specified application and remove any associated data from Refold.
 
 ###### Parameters
 
@@ -275,7 +275,7 @@ Disconnect the specified application and remove any associated data from Cobalt.
 
 > **executeWorkflow**(`options`): `Promise`\<`unknown`\>
 
-Defined in: [cobalt.ts:968](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L968)
+Defined in: [refold.ts:968](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L968)
 
 Execute the specified public workflow.
 
@@ -292,7 +292,7 @@ Execute the specified public workflow.
 ##### getApp()
 
 Returns the application details for the specified application, provided
-the application is enabled in Cobalt. If no application is specified,
+the application is enabled in Refold. If no application is specified,
 it returns all the enabled applications.
 
 ###### Param
@@ -303,7 +303,7 @@ The application slug.
 
 > **getApp**(): `Promise`\<[`Application`](#application)[]\>
 
-Defined in: [cobalt.ts:434](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L434)
+Defined in: [refold.ts:434](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L434)
 
 Returns the list of enabled applications and their details.
 
@@ -317,10 +317,10 @@ The list of applications.
 
 > **getApp**(`slug`): `Promise`\<[`Application`](#application)\>
 
-Defined in: [cobalt.ts:441](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L441)
+Defined in: [refold.ts:441](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L441)
 
 Returns the application details for the specified application, provided
-the application is enabled in Cobalt.
+the application is enabled in Refold.
 
 ###### Parameters
 
@@ -338,7 +338,7 @@ The application details.
 
 > **getApps**(): `Promise`\<[`Application`](#application)[]\>
 
-Defined in: [cobalt.ts:469](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L469)
+Defined in: [refold.ts:469](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L469)
 
 Returns all the enabled apps.
 
@@ -352,7 +352,7 @@ The list of applications.
 
 > **getConfig**(`slug`, `configId?`, `excludeOptions?`): `Promise`\<[`Config`](#config-1)\>
 
-Defined in: [cobalt.ts:686](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L686)
+Defined in: [refold.ts:686](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L686)
 
 Returns the specified config.
 
@@ -374,7 +374,7 @@ The specified config.
 
 > **getConfigField**(`slug`, `fieldId`, `workflowId?`, `payload?`): `Promise`\<[`Config`](#config-1)\>
 
-Defined in: [cobalt.ts:755](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L755)
+Defined in: [refold.ts:755](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L755)
 
 Returns the specified field of the config.
 
@@ -397,7 +397,7 @@ The specified config field.
 
 > **getConfigs**(`slug`): `Promise`\<`object`[]\>
 
-Defined in: [cobalt.ts:664](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L664)
+Defined in: [refold.ts:664](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L664)
 
 Returns the configs created for the specified application.
 
@@ -417,7 +417,7 @@ The configs created for the specified application.
 
 > **getExecution**(`executionId`): `Promise`\<[`Execution`](#execution)\>
 
-Defined in: [cobalt.ts:1028](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L1028)
+Defined in: [refold.ts:1028](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L1028)
 
 Returns the specified workflow execution log.
 
@@ -437,7 +437,7 @@ The specified execution log.
 
 > **getExecutions**(`params?`): `Promise`\<`PaginatedResponse`\<[`Execution`](#execution)\>\>
 
-Defined in: [cobalt.ts:1002](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L1002)
+Defined in: [refold.ts:1002](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L1002)
 
 Returns the workflow execution logs for the linked account.
 
@@ -457,7 +457,7 @@ The paginated workflow execution logs.
 
 > **getFieldOptions**(`lhs`, `slug`, `fieldId`, `workflowId?`): `Promise`\<[`RuleOptions`](#ruleoptions)\>
 
-Defined in: [cobalt.ts:833](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L833)
+Defined in: [refold.ts:833](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L833)
 
 Returns the options for the specified field.
 
@@ -480,7 +480,7 @@ The specified rule field's options.
 
 > **getWorkflowPayload**(`workflowId`): `Promise`\<[`WorkflowPayloadResponse`](#workflowpayloadresponse)\>
 
-Defined in: [cobalt.ts:945](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L945)
+Defined in: [refold.ts:945](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L945)
 
 Returns the execution payload for the specified public workflow.
 
@@ -500,7 +500,7 @@ The workflow payload response.
 
 > **getWorkflows**(`params?`): `Promise`\<`PaginatedResponse`\<[`PublicWorkflow`](#publicworkflow)\>\>
 
-Defined in: [cobalt.ts:866](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L866)
+Defined in: [refold.ts:866](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L866)
 
 Returns the private workflows for the specified application.
 
@@ -518,7 +518,7 @@ Returns the private workflows for the specified application.
 
 > **updateConfig**(`payload`): `Promise`\<[`Config`](#config-1)\>
 
-Defined in: [cobalt.ts:707](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L707)
+Defined in: [refold.ts:707](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L707)
 
 Update the specified config.
 
@@ -538,7 +538,7 @@ The specified config.
 
 > **updateConfigField**(`slug`, `fieldId`, `value`, `workflowId?`): `Promise`\<[`Config`](#config-1)\>
 
-Defined in: [cobalt.ts:782](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L782)
+Defined in: [refold.ts:782](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L782)
 
 Update the specified config field value.
 
@@ -561,88 +561,75 @@ The updated config field.
 
 ### Application
 
-Defined in: [cobalt.ts:16](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L16)
+Defined in: [refold.ts:16](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L16)
 
-An application in Cobalt.
+An application in Refold.
 
 #### Properties
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="app_id"></a> `app_id` | `string` | Application ID | [cobalt.ts:18](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L18) |
-| <a id="auth_input_map"></a> ~~`auth_input_map?`~~ | [`InputField`](#inputfield)[] | The fields required from the user to connect the application (for `keybased` auth type). **Deprecated** Check `auth_type_options` for multiple auth types support. | [cobalt.ts:69](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L69) |
-| <a id="auth_type"></a> ~~`auth_type`~~ | `"oauth2"` \| `"keybased"` | The type of auth used by application. **Deprecated** Check `auth_type_options` and `connected_accounts` for multiple auth types support. | [cobalt.ts:54](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L54) |
-| <a id="auth_type_options"></a> `auth_type_options?` | `object` | The supported auth types for the application, and the fields required from the user to connect the application. | [cobalt.ts:35](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L35) |
+| <a id="app_id"></a> `app_id` | `string` | Application ID | [refold.ts:18](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L18) |
+| <a id="auth_input_map"></a> ~~`auth_input_map?`~~ | [`InputField`](#inputfield)[] | The fields required from the user to connect the application (for `keybased` auth type). **Deprecated** Check `auth_type_options` for multiple auth types support. | [refold.ts:69](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L69) |
+| <a id="auth_type"></a> ~~`auth_type`~~ | `"oauth2"` \| `"keybased"` | The type of auth used by application. **Deprecated** Check `auth_type_options` and `connected_accounts` for multiple auth types support. | [refold.ts:54](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L54) |
+| <a id="auth_type_options"></a> `auth_type_options?` | `object` | The supported auth types for the application, and the fields required from the user to connect the application. | [refold.ts:35](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L35) |
 | `auth_type_options.keybased` | [`InputField`](#inputfield)[] | - |  |
 | `auth_type_options.oauth2` | [`InputField`](#inputfield)[] | - |  |
-| <a id="connected"></a> ~~`connected?`~~ | `boolean` | Whether the user has connected the application. **Deprecated** Check `connected_accounts` for multiple auth types support. | [cobalt.ts:59](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L59) |
-| <a id="connected_accounts"></a> `connected_accounts?` | `object`[] | The list of connected accounts for this application | [cobalt.ts:40](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L40) |
-| <a id="description"></a> `description` | `string` | The application description. | [cobalt.ts:22](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L22) |
-| <a id="icon"></a> `icon` | `string` | The application icon. | [cobalt.ts:24](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L24) |
-| <a id="name"></a> `name` | `string` | The application name. | [cobalt.ts:20](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L20) |
-| <a id="reauth_required"></a> ~~`reauth_required?`~~ | `boolean` | Whether the connection has expired and re-auth is required. **Deprecated** Check `connected_accounts` for multiple auth types support. | [cobalt.ts:64](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L64) |
-| <a id="slug"></a> `slug` | `string` | The application slug. | [cobalt.ts:31](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L31) |
-| <a id="tags"></a> `tags?` | `string`[] | The categories/tags for the application. | [cobalt.ts:33](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L33) |
-| <a id="type"></a> ~~`type`~~ | `string` | **Deprecated** Use `slug` instead. The application slug for native apps and `custom` for custom apps. | [cobalt.ts:29](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L29) |
-
-***
-
-### CobaltOptions
-
-Defined in: [cobalt.ts:135](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L135)
-
-#### Properties
-
-| Property | Type | Description | Defined in |
-| ------ | ------ | ------ | ------ |
-| <a id="baseurl"></a> `baseUrl?` | `string` | The base URL of the Cobalt API. You don't need to set this. | [cobalt.ts:137](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L137) |
-| <a id="token-1"></a> `token?` | `string` | The session token. | [cobalt.ts:139](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L139) |
+| <a id="connected"></a> ~~`connected?`~~ | `boolean` | Whether the user has connected the application. **Deprecated** Check `connected_accounts` for multiple auth types support. | [refold.ts:59](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L59) |
+| <a id="connected_accounts"></a> `connected_accounts?` | `object`[] | The list of connected accounts for this application | [refold.ts:40](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L40) |
+| <a id="description"></a> `description` | `string` | The application description. | [refold.ts:22](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L22) |
+| <a id="icon"></a> `icon` | `string` | The application icon. | [refold.ts:24](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L24) |
+| <a id="name"></a> `name` | `string` | The application name. | [refold.ts:20](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L20) |
+| <a id="reauth_required"></a> ~~`reauth_required?`~~ | `boolean` | Whether the connection has expired and re-auth is required. **Deprecated** Check `connected_accounts` for multiple auth types support. | [refold.ts:64](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L64) |
+| <a id="slug"></a> `slug` | `string` | The application slug. | [refold.ts:31](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L31) |
+| <a id="tags"></a> `tags?` | `string`[] | The categories/tags for the application. | [refold.ts:33](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L33) |
+| <a id="type"></a> ~~`type`~~ | `string` | **Deprecated** Use `slug` instead. The application slug for native apps and `custom` for custom apps. | [refold.ts:29](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L29) |
 
 ***
 
 ### Config
 
-Defined in: [cobalt.ts:250](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L250)
+Defined in: [refold.ts:250](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L250)
 
 #### Properties
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| <a id="config_id"></a> `config_id?` | `string` | [cobalt.ts:252](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L252) |
-| <a id="field_errors"></a> `field_errors?` | `object`[] | [cobalt.ts:255](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L255) |
-| <a id="fields"></a> `fields?` | [`ConfigField`](#configfield)[] | [cobalt.ts:253](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L253) |
-| <a id="slug-1"></a> `slug` | `string` | [cobalt.ts:251](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L251) |
-| <a id="workflows"></a> `workflows?` | [`ConfigWorkflow`](#configworkflow)[] | [cobalt.ts:254](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L254) |
+| <a id="config_id"></a> `config_id?` | `string` | [refold.ts:252](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L252) |
+| <a id="field_errors"></a> `field_errors?` | `object`[] | [refold.ts:255](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L255) |
+| <a id="fields"></a> `fields?` | [`ConfigField`](#configfield)[] | [refold.ts:253](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L253) |
+| <a id="slug-1"></a> `slug` | `string` | [refold.ts:251](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L251) |
+| <a id="workflows"></a> `workflows?` | [`ConfigWorkflow`](#configworkflow)[] | [refold.ts:254](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L254) |
 
 ***
 
 ### ConfigField
 
-Defined in: [cobalt.ts:265](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L265)
+Defined in: [refold.ts:265](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L265)
 
 #### Properties
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="associated_page"></a> `associated_page?` | `string` | The page this field is associated with. | [cobalt.ts:287](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L287) |
-| <a id="field_type"></a> `field_type` | `string` | - | [cobalt.ts:268](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L268) |
-| <a id="help_text"></a> `help_text?` | `string` | The help text for the field. | [cobalt.ts:285](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L285) |
-| <a id="hidden"></a> `hidden?` | `boolean` | - | [cobalt.ts:280](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L280) |
-| <a id="id"></a> `id` | `string` | - | [cobalt.ts:266](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L266) |
-| <a id="labels"></a> `labels?` | `object`[] | - | [cobalt.ts:274](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L274) |
-| <a id="multiple"></a> `multiple?` | `boolean` | - | [cobalt.ts:278](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L278) |
-| <a id="name-1"></a> `name` | `string` | - | [cobalt.ts:267](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L267) |
-| <a id="options"></a> `options?` | `object`[] | - | [cobalt.ts:269](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L269) |
-| <a id="parent"></a> `parent?` | `string` | - | [cobalt.ts:273](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L273) |
-| <a id="placeholder"></a> `placeholder?` | `string` | The placeholder for the field. | [cobalt.ts:283](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L283) |
-| <a id="required"></a> `required?` | `boolean` | - | [cobalt.ts:279](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L279) |
-| <a id="value"></a> `value?` | `any` | - | [cobalt.ts:281](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L281) |
+| <a id="associated_page"></a> `associated_page?` | `string` | The page this field is associated with. | [refold.ts:287](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L287) |
+| <a id="field_type"></a> `field_type` | `string` | - | [refold.ts:268](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L268) |
+| <a id="help_text"></a> `help_text?` | `string` | The help text for the field. | [refold.ts:285](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L285) |
+| <a id="hidden"></a> `hidden?` | `boolean` | - | [refold.ts:280](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L280) |
+| <a id="id"></a> `id` | `string` | - | [refold.ts:266](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L266) |
+| <a id="labels"></a> `labels?` | `object`[] | - | [refold.ts:274](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L274) |
+| <a id="multiple"></a> `multiple?` | `boolean` | - | [refold.ts:278](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L278) |
+| <a id="name-1"></a> `name` | `string` | - | [refold.ts:267](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L267) |
+| <a id="options"></a> `options?` | `object`[] | - | [refold.ts:269](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L269) |
+| <a id="parent"></a> `parent?` | `string` | - | [refold.ts:273](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L273) |
+| <a id="placeholder"></a> `placeholder?` | `string` | The placeholder for the field. | [refold.ts:283](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L283) |
+| <a id="required"></a> `required?` | `boolean` | - | [refold.ts:279](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L279) |
+| <a id="value"></a> `value?` | `any` | - | [refold.ts:281](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L281) |
 
 ***
 
 ### ConfigPayload
 
-Defined in: [cobalt.ts:96](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L96)
+Defined in: [refold.ts:96](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L96)
 
 The payload object for config.
 
@@ -650,87 +637,87 @@ The payload object for config.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="config_id-1"></a> `config_id?` | `string` | Unique ID for the config. | [cobalt.ts:100](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L100) |
-| <a id="labels-1"></a> `labels?` | [`Label`](#label-1)[] | The dynamic label mappings. | [cobalt.ts:102](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L102) |
-| <a id="slug-2"></a> `slug` | `string` | The application slug. | [cobalt.ts:98](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L98) |
+| <a id="config_id-1"></a> `config_id?` | `string` | Unique ID for the config. | [refold.ts:100](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L100) |
+| <a id="labels-1"></a> `labels?` | [`Label`](#label-1)[] | The dynamic label mappings. | [refold.ts:102](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L102) |
+| <a id="slug-2"></a> `slug` | `string` | The application slug. | [refold.ts:98](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L98) |
 
 ***
 
 ### ConfigWorkflow
 
-Defined in: [cobalt.ts:290](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L290)
+Defined in: [refold.ts:290](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L290)
 
 #### Properties
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| <a id="description-1"></a> `description?` | `string` | [cobalt.ts:293](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L293) |
-| <a id="enabled"></a> `enabled` | `boolean` | [cobalt.ts:294](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L294) |
-| <a id="fields-1"></a> `fields?` | [`ConfigField`](#configfield)[] | [cobalt.ts:295](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L295) |
-| <a id="id-1"></a> `id` | `string` | [cobalt.ts:291](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L291) |
-| <a id="name-2"></a> `name` | `string` | [cobalt.ts:292](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L292) |
+| <a id="description-1"></a> `description?` | `string` | [refold.ts:293](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L293) |
+| <a id="enabled"></a> `enabled` | `boolean` | [refold.ts:294](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L294) |
+| <a id="fields-1"></a> `fields?` | [`ConfigField`](#configfield)[] | [refold.ts:295](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L295) |
+| <a id="id-1"></a> `id` | `string` | [refold.ts:291](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L291) |
+| <a id="name-2"></a> `name` | `string` | [refold.ts:292](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L292) |
 
 ***
 
 ### ExecuteWorkflowPayload
 
-Defined in: [cobalt.ts:304](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L304)
+Defined in: [refold.ts:304](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L304)
 
 #### Properties
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="payload"></a> `payload?` | `Record`\<`string`, `any`\> | The payload to execute the workflow. | [cobalt.ts:310](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L310) |
-| <a id="slug-3"></a> `slug?` | `string` | The application's slug this workflow belongs to. | [cobalt.ts:308](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L308) |
-| <a id="sync_execution"></a> `sync_execution?` | `boolean` | Whether to execute the workflow synchronously. | [cobalt.ts:312](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L312) |
-| <a id="worklfow"></a> `worklfow` | `string` | The workflow id or alias. | [cobalt.ts:306](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L306) |
+| <a id="payload"></a> `payload?` | `Record`\<`string`, `any`\> | The payload to execute the workflow. | [refold.ts:310](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L310) |
+| <a id="slug-3"></a> `slug?` | `string` | The application's slug this workflow belongs to. | [refold.ts:308](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L308) |
+| <a id="sync_execution"></a> `sync_execution?` | `boolean` | Whether to execute the workflow synchronously. | [refold.ts:312](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L312) |
+| <a id="worklfow"></a> `worklfow` | `string` | The workflow id or alias. | [refold.ts:306](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L306) |
 
 ***
 
 ### Execution
 
-Defined in: [cobalt.ts:315](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L315)
+Defined in: [refold.ts:315](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L315)
 
 #### Properties
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| <a id="_id"></a> `_id` | `string` | [cobalt.ts:316](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L316) |
-| <a id="associated_application"></a> `associated_application` | `object` | [cobalt.ts:320](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L320) |
-| `associated_application._id` | `string` | [cobalt.ts:321](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L321) |
-| `associated_application.icon?` | `string` | [cobalt.ts:323](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L323) |
-| `associated_application.name` | `string` | [cobalt.ts:322](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L322) |
-| <a id="associated_event_id"></a> `associated_event_id` | `string` | [cobalt.ts:344](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L344) |
-| <a id="associated_trigger_application"></a> `associated_trigger_application` | `object` | [cobalt.ts:330](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L330) |
-| `associated_trigger_application._id` | `string` | [cobalt.ts:331](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L331) |
-| `associated_trigger_application.app_type?` | `string` | [cobalt.ts:334](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L334) |
-| `associated_trigger_application.icon?` | `string` | [cobalt.ts:333](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L333) |
-| `associated_trigger_application.name` | `string` | [cobalt.ts:332](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L332) |
-| `associated_trigger_application.origin_trigger` | `object` | [cobalt.ts:335](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L335) |
-| `associated_trigger_application.origin_trigger._id` | `string` | [cobalt.ts:336](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L336) |
-| `associated_trigger_application.origin_trigger.name` | `string` | [cobalt.ts:337](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L337) |
-| <a id="associated_workflow"></a> `associated_workflow` | `object` | [cobalt.ts:326](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L326) |
-| `associated_workflow._id` | `string` | [cobalt.ts:327](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L327) |
-| `associated_workflow.name` | `string` | [cobalt.ts:328](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L328) |
-| <a id="completion_percentage"></a> `completion_percentage?` | `number` | [cobalt.ts:347](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L347) |
-| <a id="config_id-2"></a> `config_id` | `string` | [cobalt.ts:343](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L343) |
-| <a id="createdat"></a> `createdAt` | `string` | [cobalt.ts:359](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L359) |
-| <a id="custom_application_id"></a> `custom_application_id?` | `string` | [cobalt.ts:346](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L346) |
-| <a id="custom_trigger_id"></a> `custom_trigger_id?` | `string` | [cobalt.ts:345](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L345) |
-| <a id="environment"></a> `environment` | `"test"` \| `"production"` | [cobalt.ts:342](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L342) |
-| <a id="id-2"></a> `id?` | `string` | [cobalt.ts:317](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L317) |
-| <a id="linked_account_id"></a> `linked_account_id` | `string` | [cobalt.ts:341](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L341) |
-| <a id="name-3"></a> `name` | `string` | [cobalt.ts:318](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L318) |
-| <a id="nodes"></a> `nodes?` | `object`[] | [cobalt.ts:348](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L348) |
-| <a id="org_id"></a> `org_id` | `string` | [cobalt.ts:319](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L319) |
-| <a id="status"></a> `status` | [`ExecutionStatus`](#executionstatus-1) | [cobalt.ts:325](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L325) |
-| <a id="trigger_application_event"></a> `trigger_application_event?` | `string` | [cobalt.ts:340](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L340) |
+| <a id="_id"></a> `_id` | `string` | [refold.ts:316](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L316) |
+| <a id="associated_application"></a> `associated_application` | `object` | [refold.ts:320](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L320) |
+| `associated_application._id` | `string` | [refold.ts:321](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L321) |
+| `associated_application.icon?` | `string` | [refold.ts:323](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L323) |
+| `associated_application.name` | `string` | [refold.ts:322](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L322) |
+| <a id="associated_event_id"></a> `associated_event_id` | `string` | [refold.ts:344](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L344) |
+| <a id="associated_trigger_application"></a> `associated_trigger_application` | `object` | [refold.ts:330](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L330) |
+| `associated_trigger_application._id` | `string` | [refold.ts:331](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L331) |
+| `associated_trigger_application.app_type?` | `string` | [refold.ts:334](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L334) |
+| `associated_trigger_application.icon?` | `string` | [refold.ts:333](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L333) |
+| `associated_trigger_application.name` | `string` | [refold.ts:332](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L332) |
+| `associated_trigger_application.origin_trigger` | `object` | [refold.ts:335](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L335) |
+| `associated_trigger_application.origin_trigger._id` | `string` | [refold.ts:336](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L336) |
+| `associated_trigger_application.origin_trigger.name` | `string` | [refold.ts:337](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L337) |
+| <a id="associated_workflow"></a> `associated_workflow` | `object` | [refold.ts:326](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L326) |
+| `associated_workflow._id` | `string` | [refold.ts:327](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L327) |
+| `associated_workflow.name` | `string` | [refold.ts:328](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L328) |
+| <a id="completion_percentage"></a> `completion_percentage?` | `number` | [refold.ts:347](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L347) |
+| <a id="config_id-2"></a> `config_id` | `string` | [refold.ts:343](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L343) |
+| <a id="createdat"></a> `createdAt` | `string` | [refold.ts:359](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L359) |
+| <a id="custom_application_id"></a> `custom_application_id?` | `string` | [refold.ts:346](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L346) |
+| <a id="custom_trigger_id"></a> `custom_trigger_id?` | `string` | [refold.ts:345](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L345) |
+| <a id="environment"></a> `environment` | `"test"` \| `"production"` | [refold.ts:342](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L342) |
+| <a id="id-2"></a> `id?` | `string` | [refold.ts:317](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L317) |
+| <a id="linked_account_id"></a> `linked_account_id` | `string` | [refold.ts:341](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L341) |
+| <a id="name-3"></a> `name` | `string` | [refold.ts:318](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L318) |
+| <a id="nodes"></a> `nodes?` | `object`[] | [refold.ts:348](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L348) |
+| <a id="org_id"></a> `org_id` | `string` | [refold.ts:319](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L319) |
+| <a id="status"></a> `status` | [`ExecutionStatus`](#executionstatus-1) | [refold.ts:325](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L325) |
+| <a id="trigger_application_event"></a> `trigger_application_event?` | `string` | [refold.ts:340](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L340) |
 
 ***
 
 ### ExecutionFilters
 
-Defined in: [cobalt.ts:219](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L219)
+Defined in: [refold.ts:219](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L219)
 
 Filters for narrowing down the list of workflow executions.
 
@@ -742,19 +729,19 @@ Filters for narrowing down the list of workflow executions.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="end_date"></a> `end_date?` | `string` | Filter executions that started on or before this ISO 8601 date string. | [cobalt.ts:229](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L229) |
-| <a id="execution_source"></a> `execution_source?` | [`ExecutionSource`](#executionsource) | Filter by the trigger source that initiated the execution. | [cobalt.ts:233](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L233) |
-| <a id="execution_type"></a> `execution_type?` | [`ExecutionType`](#executiontype) | Filter by how the execution was invoked — synchronously or asynchronously. | [cobalt.ts:231](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L231) |
-| <a id="start_date"></a> `start_date?` | `string` | Filter executions that started on or after this ISO 8601 date string. | [cobalt.ts:227](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L227) |
-| <a id="status-1"></a> `status?` | [`ExecutionStatus`](#executionstatus-1) | Filter executions by their current status. | [cobalt.ts:221](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L221) |
-| <a id="workflow_id"></a> `workflow_id?` | `string` | Filter executions by workflow ID. | [cobalt.ts:225](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L225) |
-| <a id="workflow_name"></a> `workflow_name?` | `string` | Filter executions by workflow name (partial match). | [cobalt.ts:223](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L223) |
+| <a id="end_date"></a> `end_date?` | `string` | Filter executions that started on or before this ISO 8601 date string. | [refold.ts:229](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L229) |
+| <a id="execution_source"></a> `execution_source?` | [`ExecutionSource`](#executionsource) | Filter by the trigger source that initiated the execution. | [refold.ts:233](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L233) |
+| <a id="execution_type"></a> `execution_type?` | [`ExecutionType`](#executiontype) | Filter by how the execution was invoked — synchronously or asynchronously. | [refold.ts:231](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L231) |
+| <a id="start_date"></a> `start_date?` | `string` | Filter executions that started on or after this ISO 8601 date string. | [refold.ts:227](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L227) |
+| <a id="status-1"></a> `status?` | [`ExecutionStatus`](#executionstatus-1) | Filter executions by their current status. | [refold.ts:221](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L221) |
+| <a id="workflow_id"></a> `workflow_id?` | `string` | Filter executions by workflow ID. | [refold.ts:225](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L225) |
+| <a id="workflow_name"></a> `workflow_name?` | `string` | Filter executions by workflow name (partial match). | [refold.ts:223](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L223) |
 
 ***
 
 ### GetExecutionsParams
 
-Defined in: [cobalt.ts:237](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L237)
+Defined in: [refold.ts:237](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L237)
 
 Parameters for filtering and paginating the list of workflow executions.
 
@@ -772,21 +759,21 @@ Any additional filter keys supported by the API.
 
 | Property | Type | Description | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="end_date-1"></a> `end_date?` | `string` | Filter executions that started on or before this ISO 8601 date string. | [`ExecutionFilters`](#executionfilters).[`end_date`](#end_date) | [cobalt.ts:229](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L229) |
-| <a id="execution_source-1"></a> `execution_source?` | [`ExecutionSource`](#executionsource) | Filter by the trigger source that initiated the execution. | [`ExecutionFilters`](#executionfilters).[`execution_source`](#execution_source) | [cobalt.ts:233](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L233) |
-| <a id="execution_type-1"></a> `execution_type?` | [`ExecutionType`](#executiontype) | Filter by how the execution was invoked — synchronously or asynchronously. | [`ExecutionFilters`](#executionfilters).[`execution_type`](#execution_type) | [cobalt.ts:231](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L231) |
-| <a id="limit"></a> `limit?` | `number` | - | `PaginationProps.limit` | [cobalt.ts:208](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L208) |
-| <a id="page"></a> `page?` | `number` | - | `PaginationProps.page` | [cobalt.ts:207](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L207) |
-| <a id="start_date-1"></a> `start_date?` | `string` | Filter executions that started on or after this ISO 8601 date string. | [`ExecutionFilters`](#executionfilters).[`start_date`](#start_date) | [cobalt.ts:227](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L227) |
-| <a id="status-2"></a> `status?` | [`ExecutionStatus`](#executionstatus-1) | Filter executions by their current status. | [`ExecutionFilters`](#executionfilters).[`status`](#status-1) | [cobalt.ts:221](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L221) |
-| <a id="workflow_id-1"></a> `workflow_id?` | `string` | Filter executions by workflow ID. | [`ExecutionFilters`](#executionfilters).[`workflow_id`](#workflow_id) | [cobalt.ts:225](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L225) |
-| <a id="workflow_name-1"></a> `workflow_name?` | `string` | Filter executions by workflow name (partial match). | [`ExecutionFilters`](#executionfilters).[`workflow_name`](#workflow_name) | [cobalt.ts:223](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L223) |
+| <a id="end_date-1"></a> `end_date?` | `string` | Filter executions that started on or before this ISO 8601 date string. | [`ExecutionFilters`](#executionfilters).[`end_date`](#end_date) | [refold.ts:229](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L229) |
+| <a id="execution_source-1"></a> `execution_source?` | [`ExecutionSource`](#executionsource) | Filter by the trigger source that initiated the execution. | [`ExecutionFilters`](#executionfilters).[`execution_source`](#execution_source) | [refold.ts:233](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L233) |
+| <a id="execution_type-1"></a> `execution_type?` | [`ExecutionType`](#executiontype) | Filter by how the execution was invoked — synchronously or asynchronously. | [`ExecutionFilters`](#executionfilters).[`execution_type`](#execution_type) | [refold.ts:231](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L231) |
+| <a id="limit"></a> `limit?` | `number` | - | `PaginationProps.limit` | [refold.ts:208](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L208) |
+| <a id="page"></a> `page?` | `number` | - | `PaginationProps.page` | [refold.ts:207](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L207) |
+| <a id="start_date-1"></a> `start_date?` | `string` | Filter executions that started on or after this ISO 8601 date string. | [`ExecutionFilters`](#executionfilters).[`start_date`](#start_date) | [refold.ts:227](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L227) |
+| <a id="status-2"></a> `status?` | [`ExecutionStatus`](#executionstatus-1) | Filter executions by their current status. | [`ExecutionFilters`](#executionfilters).[`status`](#status-1) | [refold.ts:221](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L221) |
+| <a id="workflow_id-1"></a> `workflow_id?` | `string` | Filter executions by workflow ID. | [`ExecutionFilters`](#executionfilters).[`workflow_id`](#workflow_id) | [refold.ts:225](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L225) |
+| <a id="workflow_name-1"></a> `workflow_name?` | `string` | Filter executions by workflow name (partial match). | [`ExecutionFilters`](#executionfilters).[`workflow_name`](#workflow_name) | [refold.ts:223](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L223) |
 
 ***
 
 ### InputField
 
-Defined in: [cobalt.ts:73](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L73)
+Defined in: [refold.ts:73](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L73)
 
 An Input field to take input from the user.
 
@@ -794,20 +781,20 @@ An Input field to take input from the user.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="help_text-1"></a> `help_text?` | `string` | The help text for the field. | [cobalt.ts:87](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L87) |
-| <a id="label"></a> `label` | `string` | The label of the field. | [cobalt.ts:85](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L85) |
-| <a id="multiple-1"></a> `multiple?` | `boolean` | Whether the field accepts multiple values. | [cobalt.ts:81](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L81) |
-| <a id="name-4"></a> `name` | `string` | Key name of the field. | [cobalt.ts:75](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L75) |
-| <a id="options-1"></a> `options?` | `object`[] | The options for the field. | [cobalt.ts:89](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L89) |
-| <a id="placeholder-1"></a> `placeholder` | `string` | The placeholder of the field. | [cobalt.ts:83](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L83) |
-| <a id="required-1"></a> `required` | `boolean` | Whether the field is required. | [cobalt.ts:79](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L79) |
-| <a id="type-1"></a> `type` | `string` | Input type of the field. | [cobalt.ts:77](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L77) |
+| <a id="help_text-1"></a> `help_text?` | `string` | The help text for the field. | [refold.ts:87](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L87) |
+| <a id="label"></a> `label` | `string` | The label of the field. | [refold.ts:85](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L85) |
+| <a id="multiple-1"></a> `multiple?` | `boolean` | Whether the field accepts multiple values. | [refold.ts:81](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L81) |
+| <a id="name-4"></a> `name` | `string` | Key name of the field. | [refold.ts:75](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L75) |
+| <a id="options-1"></a> `options?` | `object`[] | The options for the field. | [refold.ts:89](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L89) |
+| <a id="placeholder-1"></a> `placeholder` | `string` | The placeholder of the field. | [refold.ts:83](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L83) |
+| <a id="required-1"></a> `required` | `boolean` | Whether the field is required. | [refold.ts:79](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L79) |
+| <a id="type-1"></a> `type` | `string` | Input type of the field. | [refold.ts:77](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L77) |
 
 ***
 
 ### Label
 
-Defined in: [cobalt.ts:106](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L106)
+Defined in: [refold.ts:106](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L106)
 
 Label Mapping
 
@@ -815,34 +802,34 @@ Label Mapping
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="name-5"></a> `name` | `string` | The label name. | [cobalt.ts:108](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L108) |
-| <a id="value-1"></a> `value` | `string` \| `number` \| `boolean` | The label value. | [cobalt.ts:110](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L110) |
+| <a id="name-5"></a> `name` | `string` | The label name. | [refold.ts:108](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L108) |
+| <a id="value-1"></a> `value` | `string` \| `number` \| `boolean` | The label value. | [refold.ts:110](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L110) |
 
 ***
 
 ### PublicWorkflow
 
-Defined in: [cobalt.ts:163](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L163)
+Defined in: [refold.ts:163](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L163)
 
-A public workflow in Cobalt.
+A public workflow in Refold.
 
 #### Properties
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="_id-1"></a> `_id` | `string` | The workflow ID. | [cobalt.ts:165](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L165) |
-| <a id="createdat-1"></a> `createdAt` | `string` | The workflow created at. | [cobalt.ts:173](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L173) |
-| <a id="description-2"></a> `description?` | `string` | The workflow description. | [cobalt.ts:169](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L169) |
-| <a id="name-6"></a> `name` | `string` | The workflow name. | [cobalt.ts:167](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L167) |
-| <a id="published"></a> `published` | `boolean` | Whether the workflow is published. | [cobalt.ts:177](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L177) |
-| <a id="slug-4"></a> `slug?` | `string` | The application's slug in which this workflow exists. | [cobalt.ts:171](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L171) |
-| <a id="updatedat"></a> `updatedAt` | `string` | The workflow updated at. | [cobalt.ts:175](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L175) |
+| <a id="_id-1"></a> `_id` | `string` | The workflow ID. | [refold.ts:165](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L165) |
+| <a id="createdat-1"></a> `createdAt` | `string` | The workflow created at. | [refold.ts:173](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L173) |
+| <a id="description-2"></a> `description?` | `string` | The workflow description. | [refold.ts:169](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L169) |
+| <a id="name-6"></a> `name` | `string` | The workflow name. | [refold.ts:167](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L167) |
+| <a id="published"></a> `published` | `boolean` | Whether the workflow is published. | [refold.ts:177](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L177) |
+| <a id="slug-4"></a> `slug?` | `string` | The application's slug in which this workflow exists. | [refold.ts:171](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L171) |
+| <a id="updatedat"></a> `updatedAt` | `string` | The workflow updated at. | [refold.ts:175](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L175) |
 
 ***
 
 ### PublicWorkflowPayload
 
-Defined in: [cobalt.ts:181](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L181)
+Defined in: [refold.ts:181](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L181)
 
 The payload for creating a public workflow for the linked account.
 
@@ -850,15 +837,15 @@ The payload for creating a public workflow for the linked account.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="description-3"></a> `description?` | `string` | The workflow description. | [cobalt.ts:185](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L185) |
-| <a id="name-7"></a> `name` | `string` | The workflow name. | [cobalt.ts:183](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L183) |
-| <a id="slug-5"></a> `slug?` | `string` | The application slug in which this workflow should be created. | [cobalt.ts:187](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L187) |
+| <a id="description-3"></a> `description?` | `string` | The workflow description. | [refold.ts:185](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L185) |
+| <a id="name-7"></a> `name` | `string` | The workflow name. | [refold.ts:183](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L183) |
+| <a id="slug-5"></a> `slug?` | `string` | The application slug in which this workflow should be created. | [refold.ts:187](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L187) |
 
 ***
 
 ### PublicWorkflowsPayload
 
-Defined in: [cobalt.ts:191](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L191)
+Defined in: [refold.ts:191](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L191)
 
 Parameters for filtering and paginating the list of workflows.
 
@@ -876,43 +863,56 @@ Any additional filter keys supported by the API.
 
 | Property | Type | Description | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="end_date-2"></a> `end_date?` | `string` | Filter workflows created on or before this ISO 8601 date string. | - | [cobalt.ts:199](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L199) |
-| <a id="limit-1"></a> `limit?` | `number` | - | `PaginationProps.limit` | [cobalt.ts:208](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L208) |
-| <a id="name-8"></a> `name?` | `string` | Filter workflows by name (partial match). | - | [cobalt.ts:195](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L195) |
-| <a id="page-1"></a> `page?` | `number` | - | `PaginationProps.page` | [cobalt.ts:207](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L207) |
-| <a id="published-1"></a> `published?` | `boolean` | Filter by workflow published status. `true` returns only published workflows, `false` returns only drafts. | - | [cobalt.ts:201](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L201) |
-| <a id="slug-6"></a> `slug?` | `string` | Filter workflows by the application slug. | - | [cobalt.ts:193](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L193) |
-| <a id="start_date-2"></a> `start_date?` | `string` | Filter workflows created on or after this ISO 8601 date string. | - | [cobalt.ts:197](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L197) |
+| <a id="end_date-2"></a> `end_date?` | `string` | Filter workflows created on or before this ISO 8601 date string. | - | [refold.ts:199](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L199) |
+| <a id="limit-1"></a> `limit?` | `number` | - | `PaginationProps.limit` | [refold.ts:208](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L208) |
+| <a id="name-8"></a> `name?` | `string` | Filter workflows by name (partial match). | - | [refold.ts:195](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L195) |
+| <a id="page-1"></a> `page?` | `number` | - | `PaginationProps.page` | [refold.ts:207](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L207) |
+| <a id="published-1"></a> `published?` | `boolean` | Filter by workflow published status. `true` returns only published workflows, `false` returns only drafts. | - | [refold.ts:201](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L201) |
+| <a id="slug-6"></a> `slug?` | `string` | Filter workflows by the application slug. | - | [refold.ts:193](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L193) |
+| <a id="start_date-2"></a> `start_date?` | `string` | Filter workflows created on or after this ISO 8601 date string. | - | [refold.ts:197](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L197) |
+
+***
+
+### RefoldOptions
+
+Defined in: [refold.ts:135](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L135)
+
+#### Properties
+
+| Property | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ |
+| <a id="baseurl"></a> `baseUrl?` | `string` | The base URL of the Refold API. You don't need to set this. | [refold.ts:137](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L137) |
+| <a id="token-1"></a> `token?` | `string` | The session token. | [refold.ts:139](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L139) |
 
 ***
 
 ### RuleOptions
 
-Defined in: [cobalt.ts:142](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L142)
+Defined in: [refold.ts:142](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L142)
 
 #### Properties
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| <a id="conditional_code_stdout"></a> `conditional_code_stdout?` | `string`[] | [cobalt.ts:155](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L155) |
-| <a id="error"></a> `error?` | `object` | [cobalt.ts:156](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L156) |
-| `error.message?` | `string` | [cobalt.ts:157](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L157) |
-| `error.stack?` | `string` | [cobalt.ts:158](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L158) |
-| <a id="rule_column"></a> `rule_column` | `object` | [cobalt.ts:143](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L143) |
-| `rule_column.operator` | `object` | [cobalt.ts:149](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L149) |
-| `rule_column.operator.name` | `string` | [cobalt.ts:150](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L150) |
-| `rule_column.operator.options` | [`Label`](#label-1)[] | [cobalt.ts:152](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L152) |
-| `rule_column.operator.type` | `"select"` | [cobalt.ts:151](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L151) |
-| `rule_column.rhs` | `object` | [cobalt.ts:144](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L144) |
-| `rule_column.rhs.name` | `string` | [cobalt.ts:145](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L145) |
-| `rule_column.rhs.options?` | [`Label`](#label-1)[] | [cobalt.ts:147](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L147) |
-| `rule_column.rhs.type` | `"text"` \| `"select"` | [cobalt.ts:146](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L146) |
+| <a id="conditional_code_stdout"></a> `conditional_code_stdout?` | `string`[] | [refold.ts:155](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L155) |
+| <a id="error"></a> `error?` | `object` | [refold.ts:156](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L156) |
+| `error.message?` | `string` | [refold.ts:157](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L157) |
+| `error.stack?` | `string` | [refold.ts:158](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L158) |
+| <a id="rule_column"></a> `rule_column` | `object` | [refold.ts:143](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L143) |
+| `rule_column.operator` | `object` | [refold.ts:149](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L149) |
+| `rule_column.operator.name` | `string` | [refold.ts:150](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L150) |
+| `rule_column.operator.options` | [`Label`](#label-1)[] | [refold.ts:152](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L152) |
+| `rule_column.operator.type` | `"select"` | [refold.ts:151](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L151) |
+| `rule_column.rhs` | `object` | [refold.ts:144](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L144) |
+| `rule_column.rhs.name` | `string` | [refold.ts:145](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L145) |
+| `rule_column.rhs.options?` | [`Label`](#label-1)[] | [refold.ts:147](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L147) |
+| `rule_column.rhs.type` | `"text"` \| `"select"` | [refold.ts:146](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L146) |
 
 ***
 
 ### UpdateConfigPayload
 
-Defined in: [cobalt.ts:114](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L114)
+Defined in: [refold.ts:114](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L114)
 
 The configuration data for an application.
 
@@ -920,16 +920,16 @@ The configuration data for an application.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="config_id-3"></a> `config_id?` | `string` | Unique ID for the config. | [cobalt.ts:118](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L118) |
-| <a id="fields-2"></a> `fields` | `Record`\<`string`, `string` \| `number` \| `boolean`\> | A map of application fields and their values. | [cobalt.ts:120](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L120) |
-| <a id="slug-7"></a> `slug` | `string` | The application slug | [cobalt.ts:116](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L116) |
-| <a id="workflows-1"></a> `workflows` | [`WorkflowPayload`](#workflowpayload)[] | The config workflows data. | [cobalt.ts:122](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L122) |
+| <a id="config_id-3"></a> `config_id?` | `string` | Unique ID for the config. | [refold.ts:118](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L118) |
+| <a id="fields-2"></a> `fields` | `Record`\<`string`, `string` \| `number` \| `boolean`\> | A map of application fields and their values. | [refold.ts:120](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L120) |
+| <a id="slug-7"></a> `slug` | `string` | The application slug | [refold.ts:116](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L116) |
+| <a id="workflows-1"></a> `workflows` | [`WorkflowPayload`](#workflowpayload)[] | The config workflows data. | [refold.ts:122](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L122) |
 
 ***
 
 ### WorkflowPayload
 
-Defined in: [cobalt.ts:126](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L126)
+Defined in: [refold.ts:126](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L126)
 
 The workflow.
 
@@ -937,23 +937,23 @@ The workflow.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="enabled-1"></a> `enabled` | `boolean` | Whether the workflow is enabled. | [cobalt.ts:130](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L130) |
-| <a id="fields-3"></a> `fields` | `Record`\<`string`, `string` \| `number` \| `boolean`\> | A map of workflow field names and their values. | [cobalt.ts:132](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L132) |
-| <a id="id-3"></a> `id` | `string` | The ID of the workflow. | [cobalt.ts:128](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L128) |
+| <a id="enabled-1"></a> `enabled` | `boolean` | Whether the workflow is enabled. | [refold.ts:130](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L130) |
+| <a id="fields-3"></a> `fields` | `Record`\<`string`, `string` \| `number` \| `boolean`\> | A map of workflow field names and their values. | [refold.ts:132](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L132) |
+| <a id="id-3"></a> `id` | `string` | The ID of the workflow. | [refold.ts:128](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L128) |
 
 ***
 
 ### WorkflowPayloadResponse
 
-Defined in: [cobalt.ts:298](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L298)
+Defined in: [refold.ts:298](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L298)
 
 #### Properties
 
 | Property | Type | Defined in |
 | ------ | ------ | ------ |
-| <a id="payload-1"></a> `payload` | `Record`\<`string`, `any`\> | [cobalt.ts:299](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L299) |
-| <a id="schema"></a> `schema?` | `unknown` | [cobalt.ts:300](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L300) |
-| <a id="schema_interpreted"></a> `schema_interpreted?` | `unknown` | [cobalt.ts:301](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L301) |
+| <a id="payload-1"></a> `payload` | `Record`\<`string`, `any`\> | [refold.ts:299](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L299) |
+| <a id="schema"></a> `schema?` | `unknown` | [refold.ts:300](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L300) |
+| <a id="schema_interpreted"></a> `schema_interpreted?` | `unknown` | [refold.ts:301](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L301) |
 
 ## Type Aliases
 
@@ -961,7 +961,7 @@ Defined in: [cobalt.ts:298](https://github.com/gocobalt/cobalt-js/blob/e483ef6cc
 
 > **ExecutionSource** = `"Event"` \| `"Schedule"` \| `"API Call"`
 
-Defined in: [cobalt.ts:214](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L214)
+Defined in: [refold.ts:214](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L214)
 
 The trigger source that initiated a workflow execution.
 
@@ -971,7 +971,7 @@ The trigger source that initiated a workflow execution.
 
 > **ExecutionStatus** = `"COMPLETED"` \| `"RUNNING"` \| `"ERRORED"` \| `"STOPPED"` \| `"STOPPING"` \| `"TIMED_OUT"`
 
-Defined in: [cobalt.ts:212](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L212)
+Defined in: [refold.ts:212](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L212)
 
 The current status of a workflow execution.
 
@@ -981,6 +981,6 @@ The current status of a workflow execution.
 
 > **ExecutionType** = `"SYNC"` \| `"ASYNC"`
 
-Defined in: [cobalt.ts:216](https://github.com/gocobalt/cobalt-js/blob/e483ef6ccc3799692bbf737cca22eb6b60322b05/cobalt.ts#L216)
+Defined in: [refold.ts:216](https://github.com/gocobalt/refold-js/blob/c234ec1f1c2c551a366c639651fe6f9201f6ff9f/refold.ts#L216)
 
 Whether a workflow execution runs synchronously (waits for result) or asynchronously (fire-and-forget).

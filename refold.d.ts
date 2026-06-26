@@ -1,5 +1,5 @@
 /**
- * Cobalt Frontend SDK
+ * Refold Frontend SDK
  */
 export declare enum AuthType {
     OAuth2 = "oauth2",
@@ -9,7 +9,7 @@ export declare enum AuthStatus {
     Active = "active",
     Expired = "expired"
 }
-/** An application in Cobalt. */
+/** An application in Refold. */
 export interface Application {
     /** Application ID */
     app_id: string;
@@ -122,8 +122,8 @@ export interface WorkflowPayload {
     /** A map of workflow field names and their values. */
     fields: Record<string, string | number | boolean>;
 }
-export interface CobaltOptions {
-    /** The base URL of the Cobalt API. You don't need to set this. */
+export interface RefoldOptions {
+    /** The base URL of the Refold API. You don't need to set this. */
     baseUrl?: string;
     /** The session token. */
     token?: string;
@@ -147,7 +147,7 @@ export interface RuleOptions {
         stack?: string;
     };
 }
-/** A public workflow in Cobalt. */
+/** A public workflow in Refold. */
 export interface PublicWorkflow {
     /**The workflow ID. */
     _id: string;
@@ -333,16 +333,16 @@ export interface Execution {
     }[];
     createdAt: string;
 }
-declare class Cobalt {
+declare class Refold {
     private baseUrl;
     token: string;
     /**
-     * Cobalt Frontend SDK
-     * @param {Object} options The options to configure the Cobalt SDK.
+     * Refold Frontend SDK
+     * @param {Object} options The options to configure the Refold SDK.
      * @param {String} [options.token] The session token.
-     * @param {String} [options.baseUrl=https://api.gocobalt.io] The base URL of the Cobalt API.
+     * @param {String} [options.baseUrl=https://app.refold.ai] The base URL of the Refold API.
      */
-    constructor(options?: CobaltOptions);
+    constructor(options?: RefoldOptions);
     /**
      * Returns the org & customer details for the associated token.
      * @private
@@ -362,7 +362,7 @@ declare class Cobalt {
     getApp(): Promise<Application[]>;
     /**
      * Returns the application details for the specified application, provided
-     * the application is enabled in Cobalt.
+     * the application is enabled in Refold.
      * @param {String} slug The application slug.
      * @returns {Promise<Application>} The application details.
      */
@@ -411,7 +411,7 @@ declare class Cobalt {
         payload?: Record<string, string>;
     }): Promise<boolean>;
     /**
-     * Disconnect the specified application and remove any associated data from Cobalt.
+     * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
      * @returns {Promise<unknown>}
@@ -553,4 +553,4 @@ declare class Cobalt {
      */
     getExecution(executionId: string): Promise<Execution>;
 }
-export { Cobalt };
+export { Refold };

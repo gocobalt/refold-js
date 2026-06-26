@@ -1,5 +1,5 @@
 /**
- * Cobalt Frontend SDK
+ * Refold Frontend SDK
  */
 
 export enum AuthType {
@@ -12,7 +12,7 @@ export enum AuthStatus {
     Expired = "expired",
 }
 
-/** An application in Cobalt. */
+/** An application in Refold. */
 export interface Application {
     /** Application ID */
     app_id: string;
@@ -132,8 +132,8 @@ export interface WorkflowPayload  {
     fields: Record<string, string | number | boolean>;
 }
 
-export interface CobaltOptions {
-    /** The base URL of the Cobalt API. You don't need to set this. */
+export interface RefoldOptions {
+    /** The base URL of the Refold API. You don't need to set this. */
     baseUrl?: string;
     /** The session token. */
     token?: string;
@@ -159,7 +159,7 @@ export interface RuleOptions {
     }
 }
 
-/** A public workflow in Cobalt. */
+/** A public workflow in Refold. */
 export interface PublicWorkflow {
     /**The workflow ID. */
     _id: string;
@@ -361,22 +361,22 @@ export interface Execution {
 
 type Field = any;
 
-class Cobalt {
+class Refold {
     private baseUrl: string;
     public token: string;
 
     /**
-     * Cobalt Frontend SDK
-     * @param {Object} options The options to configure the Cobalt SDK.
+     * Refold Frontend SDK
+     * @param {Object} options The options to configure the Refold SDK.
      * @param {String} [options.token] The session token.
-     * @param {String} [options.baseUrl=https://api.gocobalt.io] The base URL of the Cobalt API.
+     * @param {String} [options.baseUrl=https://app.refold.ai] The base URL of the Refold API.
      */
-    constructor(options: CobaltOptions = {}) {
+    constructor(options: RefoldOptions = {}) {
         this.baseUrl = options.baseUrl
             ?   /^https?:\/\//.test(options.baseUrl)
                 ?   options.baseUrl
                 :   "https://" + options.baseUrl
-            :   "https://api.gocobalt.io";
+            :   "https://app.refold.ai";
         this.token = options.token || "";
     }
 
@@ -434,14 +434,14 @@ class Cobalt {
     public async getApp(): Promise<Application[]>;
     /**
      * Returns the application details for the specified application, provided
-     * the application is enabled in Cobalt.
+     * the application is enabled in Refold.
      * @param {String} slug The application slug.
      * @returns {Promise<Application>} The application details.
      */
     public async getApp(slug: string): Promise<Application>;
     /**
      * Returns the application details for the specified application, provided
-     * the application is enabled in Cobalt. If no application is specified,
+     * the application is enabled in Refold. If no application is specified,
      * it returns all the enabled applications.
      * @param {String} [slug] The application slug.
      * @returns {Promise<Application | Application[]>} The application details.
@@ -609,7 +609,7 @@ class Cobalt {
     }
 
     /**
-     * Disconnect the specified application and remove any associated data from Cobalt.
+     * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
      * @returns {Promise<unknown>}
@@ -1041,4 +1041,4 @@ class Cobalt {
     }
 }
 
-export { Cobalt };
+export { Refold };

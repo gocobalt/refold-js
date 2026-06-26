@@ -1,38 +1,38 @@
 {
-  "name": "@cobaltio/cobalt-js",
-  "version": "9.2.2",
-  "description": "Cobalt frontend SDK",
-  "main": "./cobalt.js",
-  "typings": "./cobalt.d.ts",
+  "name": "@refoldai/refold-js",
+  "version": "10.0.0",
+  "description": "Refold frontend SDK",
+  "main": "./refold.js",
+  "typings": "./refold.d.ts",
   "scripts": {
     "build": "tsc",
-    "docs": "npx typedoc cobalt.ts",
-    "docs:llms": "npx typedoc cobalt.ts --plugin typedoc-plugin-markdown --mergeReadme --enumMembersFormat table --parametersFormat table --propertiesFormat table --typeDeclarationFormat table --indexFormat table --outputFileStrategy modules --cleanOutputDir false --fileExtension .txt --out docs --entryFileName llms",
+    "docs": "npx typedoc refold.ts",
+    "docs:llms": "npx typedoc refold.ts --plugin typedoc-plugin-markdown --mergeReadme --enumMembersFormat table --parametersFormat table --propertiesFormat table --typeDeclarationFormat table --indexFormat table --outputFileStrategy modules --cleanOutputDir false --fileExtension .txt --out docs --entryFileName llms",
     "test": "echo \"Warn: no test specified\""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gocobalt/cobalt-js.git"
+    "url": "git+https://github.com/gocobalt/refold-js.git"
   },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "keywords": [
-    "cobalt embed",
-    "cobalt sdk",
+    "refold embed",
+    "refold sdk",
     "frontend sdk",
     "sdk"
   ],
   "author": "Sankarsan Kampa",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gocobalt/cobalt-js/issues"
+    "url": "https://github.com/gocobalt/refold-js/issues"
   },
-  "homepage": "https://github.com/gocobalt/cobalt-js#readme",
+  "homepage": "https://github.com/gocobalt/refold-js#readme",
   "devDependencies": {
-    "typedoc": "^0.28.18",
-    "typedoc-plugin-markdown": "^4.11.0",
-    "typescript": "^6.0.2"
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.12.0",
+    "typescript": "^6.0.3"
   }
 }

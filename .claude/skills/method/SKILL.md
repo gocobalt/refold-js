@@ -1,6 +1,6 @@
 ---
 name: method
-description: Add a new public API method to the Cobalt SDK with types, JSDoc, and endpoint mapping. Use when adding new SDK functionality.
+description: Add a new public API method to the Refold SDK with types, JSDoc, and endpoint mapping. Use when adding new SDK functionality.
 metadata:
   author: iamtraction
   version: "1.0.0"
@@ -9,7 +9,7 @@ metadata:
 
 # Add SDK Method
 
-Add a new public API method to the Cobalt class with TypeScript types, JSDoc documentation, and backend endpoint mapping.
+Add a new public API method to the Refold class with TypeScript types, JSDoc documentation, and backend endpoint mapping.
 
 ## Usage
 
@@ -19,19 +19,19 @@ The user provides a method name (e.g., "getWorkflows", "createConfig") and descr
 
 1. **Ask for details** if not provided: method name, HTTP method, endpoint URL, request payload shape, response shape, whether it supports pagination
 2. **Define TypeScript interfaces** — request payload and response types
-3. **Add JSDoc-documented method** to the `Cobalt` class
+3. **Add JSDoc-documented method** to the `Refold` class
 4. **Build** to verify compilation
 
 ## Implementation Order
 
 1. **Interfaces** — Define request/response types (before the class)
-2. **Method** — Add to `Cobalt` class with JSDoc
+2. **Method** — Add to `Refold` class with JSDoc
 3. **Build** — Run `npm run build` to generate `.js` and `.d.ts`
 
 ## Interface Template
 
 ```ts
-// Add before the Cobalt class in cobalt.ts
+// Add before the Refold class in refold.ts
 
 /** The payload for creating a resource. */
 export interface CreateResourcePayload {
@@ -264,7 +264,7 @@ interface PaginatedResponse<T> {
 ## Verification
 
 ```bash
-npm run build     # Compile to cobalt.js + cobalt.d.ts
+npm run build     # Compile to refold.js + refold.d.ts
 npm run docs:llms # Generate TypeDoc (optional)
 ```
 
@@ -276,7 +276,7 @@ npm run docs:llms # Generate TypeDoc (optional)
 - **Method overloads** — use TypeScript overloads for methods with optional parameters that change return type
 - **Error handling** — always check `res.status >= 400 && res.status < 600` and throw the parsed error
 - **`Bearer` auth** — all methods include `authorization: Bearer ${this.token}`
-- **Single file** — everything goes in `cobalt.ts`, no separate files
+- **Single file** — everything goes in `refold.ts`, no separate files
 - **Export interfaces** — all types are exported for consumer use
 - **Backward compatibility** — never rename or remove existing methods, use `@deprecated` JSDoc tag
-- **Build output** — `cobalt.js` (CommonJS) + `cobalt.d.ts` (type declarations)
+- **Build output** — `refold.js` (CommonJS) + `refold.d.ts` (type declarations)

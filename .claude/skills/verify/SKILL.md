@@ -20,7 +20,7 @@ The user provides a file path, feature name, or asks to verify recent changes. I
 ### 1. Static Analysis
 Run these checks and report results:
 ```bash
-npm run build         # TypeScript compilation → cobalt.js + cobalt.d.ts
+npm run build         # TypeScript compilation → refold.js + refold.d.ts
 ```
 
 ### 2. Type Safety Review
@@ -34,7 +34,7 @@ npm run build         # TypeScript compilation → cobalt.js + cobalt.d.ts
 Verify the code follows SDK conventions:
 - **Zero dependencies**: No runtime dependencies added
 - **Native fetch**: No HTTP libraries — uses `fetch` API only
-- **Single class**: All public API on the `Cobalt` class
+- **Single class**: All public API on the `Refold` class
 - **Error handling**: 4xx/5xx → parse JSON → throw (no swallowing errors)
 - **JSDoc on all public methods**: `@param`, `@returns` tags
 - **Backward compatibility**: No removed methods/fields, no changed signatures
@@ -80,6 +80,6 @@ Summary and recommended actions.
 ## Important
 
 - Always run `npm run build` — don't skip compilation check
-- Verify both `cobalt.js` and `cobalt.d.ts` are generated correctly
+- Verify both `refold.js` and `refold.d.ts` are generated correctly
 - Be specific about issues — include file paths and line numbers
 - Breaking changes require major version bump — flag them as critical

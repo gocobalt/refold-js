@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cobalt JS SDK (`@cobaltio/cobalt-js`) — a zero-dependency TypeScript frontend SDK for integrating with the Cobalt platform. Provides methods for application connection (OAuth2 + key-based), configuration management, workflow execution, and execution monitoring. Published to npm as a public package. Single-file library (`cobalt.ts`, ~970 lines).
+Refold JS SDK (`@refoldai/refold-js`) — a zero-dependency TypeScript frontend SDK for integrating with the Refold platform. Provides methods for application connection (OAuth2 + key-based), configuration management, workflow execution, and execution monitoring. Published to npm as a public package. Single-file library (`refold.ts`, ~970 lines).
 
 ## Commands
 
 ```bash
-npm run build          # Compile TypeScript (tsc) → cobalt.js + cobalt.d.ts
+npm run build          # Compile TypeScript (tsc) → refold.js + refold.d.ts
 npm run docs           # Generate TypeDoc HTML documentation
 npm run docs:llms      # Generate LLM-optimized markdown docs (docs/llms.txt)
 ```
@@ -18,27 +18,27 @@ No test runner is configured. No runtime dependencies.
 
 ## Build Output
 
-- `cobalt.js` — Compiled CommonJS module (main entry point)
-- `cobalt.d.ts` — TypeScript type definitions
+- `refold.js` — Compiled CommonJS module (main entry point)
+- `refold.d.ts` — TypeScript type definitions
 - `docs/` — Generated TypeDoc documentation (HTML + `llms.txt`)
 
-Published to npm (`@cobaltio/cobalt-js`) and served via jsDelivr CDN.
+Published to npm (`@refoldai/refold-js`) and served via jsDelivr CDN.
 
 ## Architecture
 
 ### Single-Class Design
-The entire SDK is a single `Cobalt` class using native `fetch` API. No external dependencies.
+The entire SDK is a single `Refold` class using native `fetch` API. No external dependencies.
 
 ### Authentication
 - Bearer token auth via `Authorization` header on all requests
-- Token set via constructor option or `cobalt.token = "..."` after initialization
-- Default base URL: `https://api.gocobalt.io` (configurable via `baseUrl` option)
+- Token set via constructor option or `refold.token = "..."` after initialization
+- Default base URL: `https://app.refold.ai` (configurable via `baseUrl` option)
 
 ### Public API
 
 **Constructor:**
 ```typescript
-const cobalt = new Cobalt({ token?: string, baseUrl?: string })
+const refold = new Refold({ token?: string, baseUrl?: string })
 ```
 
 **Application Management:**
@@ -107,7 +107,7 @@ All requests include `Authorization: Bearer ${token}`:
 
 - Target: ES6, Module: CommonJS
 - Strict mode enabled
-- Declarations emitted (`cobalt.d.ts`)
+- Declarations emitted (`refold.d.ts`)
 - LF line endings enforced
 
 ## Version History

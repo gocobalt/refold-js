@@ -13,7 +13,7 @@ Perform a thorough code review of a GitHub pull request.
 
 ## Usage
 
-The user provides a PR number or URL (e.g., `123`, `https://github.com/gocobalt/cobalt-js/pull/123`).
+The user provides a PR number or URL (e.g., `123`, `https://github.com/gocobalt/refold-js/pull/123`).
 
 ## Steps
 

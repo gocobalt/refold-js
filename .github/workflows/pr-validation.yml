@@ -209,7 +209,7 @@ jobs:
             --arg branch "$PR_BRANCH" \
             --arg author "$PR_AUTHOR" \
             '{
-              text: ":warning: *PR Validation Failed* — cobalt-js",
+              text: ":warning: *PR Validation Failed* — refold-js",
               attachments: [{
                 color: "warning",
                 fields: [
