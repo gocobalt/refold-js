@@ -92,6 +92,27 @@ export interface InputField  {
     }[];
 }
 
+export interface OAuthParams {
+    /** The application slug. */
+    slug: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
+    /** Whether to close the authentication window automatically. */
+    autoClose?: boolean;
+}
+
+export interface KeyBasedParams {
+    /** The application slug. */
+    slug: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
+}
+
+export interface ConnectParams extends OAuthParams {
+    /** The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`. */
+    type?: AuthType;
+}
+
 /** The payload object for config. */
 export interface ConfigPayload {
     /** The application slug. */
@@ -519,11 +540,7 @@ class Refold {
         slug,
         payload,
         autoClose = true,
-    }: {
-        slug: string;
-        payload?: Record<string, string>;
-        autoClose?: boolean;
-    }): Promise<boolean> {
+    }: OAuthParams): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.getOAuthUrl(slug, payload)
             .then(oauthUrl => {
@@ -572,10 +589,7 @@ class Refold {
     private async keybased({
         slug,
         payload,
-    }: {
-        slug: string;
-        payload?: Record<string, string>;
-    }): Promise<boolean> {
+    }: KeyBasedParams): Promise<boolean> {
         const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
             method: "POST",
             headers: {
@@ -611,12 +625,7 @@ class Refold {
         type,
         payload,
         autoClose = true,
-    }: {
-        slug: string;
-        type?: AuthType;
-        payload?: Record<string, string>;
-        autoClose?: boolean;
-    }): Promise<boolean> {
+    }: ConnectParams): Promise<boolean> {
         switch (type) {
             case AuthType.OAuth2:
                 return this.oauth({ slug, payload, autoClose });
