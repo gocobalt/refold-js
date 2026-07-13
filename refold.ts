@@ -384,6 +384,8 @@ type Field = any;
 
 /** How often, in milliseconds, connection status is polled during authentication. */
 const POLL_INTERVAL = 3e3;
+/** The number of consecutive polling failures tolerated before authentication is aborted. */
+const MAX_POLL_FAILURES = 3;
 
 class Refold {
     private baseUrl: string;
@@ -558,10 +560,21 @@ class Refold {
             Boolean(app?.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active));
 
         return new Promise((resolve, reject) => {
+            let inFlight = false;
+            let consecutiveFailures = 0;
+            let firstFailure: unknown;
+
             // keep checking connection status
             const interval = setInterval(() => {
+                // don't check the status again until the previous check settles
+                if (inFlight) return;
+                inFlight = true;
+
                 this.getApp(slug)
                 .then(app => {
+                    inFlight = false;
+                    consecutiveFailures = 0;
+                    firstFailure = undefined;
                     if (hasActiveOAuthAccount(app)) {
                         // close auth window
                         if (autoClose) connectWindow.close();
@@ -577,8 +590,14 @@ class Refold {
                 })
                 .catch(e => {
                     console.error(e);
-                    clearInterval(interval);
-                    reject(e);
+                    inFlight = false;
+                    // tolerate transient errors while the user authenticates
+                    consecutiveFailures += 1;
+                    firstFailure ??= e;
+                    if (consecutiveFailures >= MAX_POLL_FAILURES) {
+                        clearInterval(interval);
+                        reject(firstFailure);
+                    }
                 });
             }, POLL_INTERVAL);
         });
