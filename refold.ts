@@ -509,13 +509,23 @@ class Refold {
     /**
      * Handle OAuth for the specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param params - The parameters for the OAuth flow.
+     * @param params.slug - The application slug.
+     * @param params.payload - The key value pairs of auth data.
+     * @param params.autoClose - Whether to close the authentication window automatically. Defaults to `true`.
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
-    private async oauth(slug: string, params?: Record<string, string>): Promise<boolean> {
+    private async oauth({
+        slug,
+        payload,
+        autoClose = true,
+    }: {
+        slug: string;
+        payload?: Record<string, string>;
+        autoClose?: boolean;
+    }): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            this.getOAuthUrl(slug, params)
+            this.getOAuthUrl(slug, payload)
             .then(oauthUrl => {
                 const connectWindow = window.open(oauthUrl);
 
@@ -525,7 +535,7 @@ class Refold {
                     .then(app => {
                         if (app && app.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active)) {
                             // close auth window
-                            connectWindow && connectWindow.close();
+                            if (autoClose) connectWindow && connectWindow.close();
                             // clear interval
                             clearInterval(interval);
                             // resovle status
@@ -554,11 +564,18 @@ class Refold {
 
     /**
      * Save auth data for the specified keybased application.
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [payload] The key value pairs of auth data.
+     * @param params - The parameters for key-based auth.
+     * @param params.slug - The application slug.
+     * @param params.payload - The key value pairs of auth data.
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
-    private async keybased(slug: string, payload?: Record<string, string>): Promise<boolean> {
+    private async keybased({
+        slug,
+        payload,
+    }: {
+        slug: string;
+        payload?: Record<string, string>;
+    }): Promise<boolean> {
         const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
             method: "POST",
             headers: {
@@ -585,6 +602,7 @@ class Refold {
      * @param params.slug - The application slug.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
@@ -592,19 +610,21 @@ class Refold {
         slug,
         type,
         payload,
+        autoClose = true,
     }: {
         slug: string;
         type?: AuthType;
         payload?: Record<string, string>;
+        autoClose?: boolean;
     }): Promise<boolean> {
         switch (type) {
             case AuthType.OAuth2:
-                return this.oauth(slug, payload);
+                return this.oauth({ slug, payload, autoClose });
             case AuthType.KeyBased:
-                return this.keybased(slug, payload);
+                return this.keybased({ slug, payload });
             default:
-                if (payload) return this.keybased(slug, payload);
-                return this.oauth(slug);
+                if (payload) return this.keybased({ slug, payload });
+                return this.oauth({ slug, autoClose });
         }
     }
 
