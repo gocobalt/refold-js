@@ -535,7 +535,7 @@ class Refold {
                     .then(app => {
                         if (app && app.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active)) {
                             // close auth window
-                            if (autoClose) connectWindow && connectWindow.close();
+                            if (autoClose) connectWindow?.close();
                             // clear interval
                             clearInterval(interval);
                             // resovle status
