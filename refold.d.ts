@@ -86,6 +86,26 @@ export interface InputField {
         value: string;
     }[];
 }
+export interface OAuthParams {
+    /** The application slug. */
+    slug: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
+    /** Whether to close the authentication window automatically. */
+    autoClose?: boolean;
+    /** Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes. */
+    timeout?: number;
+}
+export interface KeyBasedParams {
+    /** The application slug. */
+    slug: string;
+    /** The key value pairs of auth data. */
+    payload?: Record<string, string>;
+}
+export interface ConnectParams extends OAuthParams {
+    /** The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`. */
+    type?: AuthType;
+}
 /** The payload object for config. */
 export interface ConfigPayload {
     /** The application slug. */
@@ -384,15 +404,19 @@ declare class Refold {
     /**
      * Handle OAuth for the specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param params - The parameters for the OAuth flow.
+     * @param params.slug - The application slug.
+     * @param params.payload - The key value pairs of auth data.
+     * @param params.autoClose - Whether to close the authentication window automatically. Defaults to `true`.
+     * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes.
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     private oauth;
     /**
      * Save auth data for the specified keybased application.
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [payload] The key value pairs of auth data.
+     * @param params - The parameters for key-based auth.
+     * @param params.slug - The application slug.
+     * @param params.payload - The key value pairs of auth data.
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
     private keybased;
@@ -402,14 +426,12 @@ declare class Refold {
      * @param params.slug - The application slug.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
+     * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 5 minutes.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
-    connect({ slug, type, payload, }: {
-        slug: string;
-        type?: AuthType;
-        payload?: Record<string, string>;
-    }): Promise<boolean>;
+    connect({ slug, type, payload, autoClose, timeout, }: ConnectParams): Promise<boolean>;
     /**
      * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.

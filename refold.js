@@ -34,6 +34,14 @@ var AuthStatus;
     AuthStatus["Active"] = "active";
     AuthStatus["Expired"] = "expired";
 })(AuthStatus || (exports.AuthStatus = AuthStatus = {}));
+/** How often, in milliseconds, connection status is polled during authentication. */
+const POLL_INTERVAL = 3e3;
+/** How long, in milliseconds, polling continues after the auth window closes or the wait times out, since the connection may complete moments later. */
+const POLL_GRACE = 6e3;
+/** The number of consecutive polling failures tolerated before authentication is aborted. */
+const MAX_POLL_FAILURES = 3;
+/** The default maximum time, in milliseconds, to wait for authentication. */
+const DEFAULT_CONNECT_TIMEOUT = 300e3;
 class Refold {
     /**
      * Refold Frontend SDK
@@ -159,59 +167,86 @@ class Refold {
     /**
      * Handle OAuth for the specified application.
      * @private
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [params] The key value pairs of auth data.
+     * @param params - The parameters for the OAuth flow.
+     * @param params.slug - The application slug.
+     * @param params.payload - The key value pairs of auth data.
+     * @param params.autoClose - Whether to close the authentication window automatically. Defaults to `true`.
+     * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes.
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
-    oauth(slug, params) {
-        return __awaiter(this, void 0, void 0, function* () {
+    oauth(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
+            const oauthUrl = yield this.getOAuthUrl(slug, payload);
+            const connectWindow = window.open(oauthUrl);
+            if (!connectWindow) {
+                throw Object.assign(new Error("The authentication window could not be opened. It may have been blocked by the browser."), { code: "POPUP_BLOCKED" });
+            }
+            const hasActiveOAuthAccount = (app) => { var _a; return Boolean((_a = app === null || app === void 0 ? void 0 : app.connected_accounts) === null || _a === void 0 ? void 0 : _a.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active)); };
             return new Promise((resolve, reject) => {
-                this.getOAuthUrl(slug, params)
-                    .then(oauthUrl => {
-                    const connectWindow = window.open(oauthUrl);
-                    // keep checking connection status
-                    const interval = setInterval(() => {
-                        this.getApp(slug)
-                            .then(app => {
-                            var _a;
-                            if (app && ((_a = app.connected_accounts) === null || _a === void 0 ? void 0 : _a.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active))) {
-                                // close auth window
-                                connectWindow && connectWindow.close();
-                                // clear interval
-                                clearInterval(interval);
-                                // resovle status
-                                resolve(true);
-                            }
-                            else {
-                                // user closed oauth window without authenticating
-                                if (connectWindow && connectWindow.closed) {
-                                    // clear interval
-                                    clearInterval(interval);
-                                    // resolve status
-                                    resolve(false);
-                                }
-                            }
-                        })
-                            .catch(e => {
-                            console.error(e);
-                            // connectWindow?.close();
+                const startedAt = Date.now();
+                let inFlight = false;
+                let consecutiveFailures = 0;
+                let firstFailure;
+                let graceStartedAt;
+                // keep checking connection status
+                const interval = setInterval(() => {
+                    const timedOut = timeout > 0 && Date.now() - startedAt >= timeout;
+                    if (connectWindow.closed || timedOut) {
+                        // the connection may complete moments around the window
+                        // closing or the wait timing out, so keep polling for a
+                        // little longer before giving up
+                        if (timedOut && autoClose)
+                            connectWindow.close();
+                        graceStartedAt !== null && graceStartedAt !== void 0 ? graceStartedAt : (graceStartedAt = Date.now());
+                        if (Date.now() - graceStartedAt >= POLL_GRACE) {
                             clearInterval(interval);
-                            reject(e);
-                        });
-                    }, 3e3);
-                })
-                    .catch(reject);
+                            resolve(false);
+                            return;
+                        }
+                    }
+                    // don't check the status again until the previous check settles
+                    if (inFlight)
+                        return;
+                    inFlight = true;
+                    this.getApp(slug)
+                        .then(app => {
+                        inFlight = false;
+                        consecutiveFailures = 0;
+                        firstFailure = undefined;
+                        if (hasActiveOAuthAccount(app)) {
+                            // close auth window
+                            if (autoClose)
+                                connectWindow.close();
+                            // clear interval
+                            clearInterval(interval);
+                            // resolve status
+                            resolve(true);
+                        }
+                    })
+                        .catch(e => {
+                        console.error(e);
+                        inFlight = false;
+                        // tolerate transient errors while the user authenticates
+                        consecutiveFailures += 1;
+                        firstFailure !== null && firstFailure !== void 0 ? firstFailure : (firstFailure = e);
+                        if (consecutiveFailures >= MAX_POLL_FAILURES) {
+                            clearInterval(interval);
+                            reject(firstFailure);
+                        }
+                    });
+                }, POLL_INTERVAL);
             });
         });
     }
     /**
      * Save auth data for the specified keybased application.
-     * @param {String} slug The application slug.
-     * @param {Object.<string, string>} [payload] The key value pairs of auth data.
+     * @param params - The parameters for key-based auth.
+     * @param params.slug - The application slug.
+     * @param params.payload - The key value pairs of auth data.
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
-    keybased(slug, payload) {
-        return __awaiter(this, void 0, void 0, function* () {
+    keybased(_a) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, }) {
             const res = yield fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
                 method: "POST",
                 headers: {
@@ -234,20 +269,22 @@ class Refold {
      * @param params.slug - The application slug.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
+     * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 5 minutes.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
     connect(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
             switch (type) {
                 case AuthType.OAuth2:
-                    return this.oauth(slug, payload);
+                    return this.oauth({ slug, payload, autoClose, timeout });
                 case AuthType.KeyBased:
-                    return this.keybased(slug, payload);
+                    return this.keybased({ slug, payload });
                 default:
                     if (payload)
-                        return this.keybased(slug, payload);
-                    return this.oauth(slug);
+                        return this.keybased({ slug, payload });
+                    return this.oauth({ slug, autoClose, timeout });
             }
         });
     }
