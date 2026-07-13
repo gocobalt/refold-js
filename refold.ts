@@ -386,6 +386,8 @@ type Field = any;
 const POLL_INTERVAL = 3e3;
 /** The number of consecutive polling failures tolerated before authentication is aborted. */
 const MAX_POLL_FAILURES = 3;
+/** How long, in milliseconds, polling continues after the auth window closes or the wait times out, since the connection may complete moments later. */
+const POLL_GRACE = 6e3;
 
 class Refold {
     private baseUrl: string;
@@ -563,9 +565,22 @@ class Refold {
             let inFlight = false;
             let consecutiveFailures = 0;
             let firstFailure: unknown;
+            let graceStartedAt: number | undefined;
 
             // keep checking connection status
             const interval = setInterval(() => {
+                if (connectWindow.closed) {
+                    // the connection may complete moments around the window
+                    // closing, so keep polling for a little longer before
+                    // giving up
+                    graceStartedAt ??= Date.now();
+                    if (Date.now() - graceStartedAt >= POLL_GRACE) {
+                        clearInterval(interval);
+                        resolve(false);
+                        return;
+                    }
+                }
+
                 // don't check the status again until the previous check settles
                 if (inFlight) return;
                 inFlight = true;
@@ -582,10 +597,6 @@ class Refold {
                         clearInterval(interval);
                         // resolve status
                         resolve(true);
-                    } else if (connectWindow.closed) {
-                        // user closed oauth window without authenticating
-                        clearInterval(interval);
-                        resolve(false);
                     }
                 })
                 .catch(e => {
