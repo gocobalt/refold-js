@@ -99,6 +99,8 @@ export interface OAuthParams {
     payload?: Record<string, string>;
     /** Whether to close the authentication window automatically. */
     autoClose?: boolean;
+    /** Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes. */
+    timeout?: number;
 }
 
 export interface KeyBasedParams {
@@ -384,10 +386,12 @@ type Field = any;
 
 /** How often, in milliseconds, connection status is polled during authentication. */
 const POLL_INTERVAL = 3e3;
-/** The number of consecutive polling failures tolerated before authentication is aborted. */
-const MAX_POLL_FAILURES = 3;
 /** How long, in milliseconds, polling continues after the auth window closes or the wait times out, since the connection may complete moments later. */
 const POLL_GRACE = 6e3;
+/** The number of consecutive polling failures tolerated before authentication is aborted. */
+const MAX_POLL_FAILURES = 3;
+/** The default maximum time, in milliseconds, to wait for authentication. */
+const DEFAULT_CONNECT_TIMEOUT = 300e3;
 
 class Refold {
     private baseUrl: string;
@@ -541,12 +545,14 @@ class Refold {
      * @param params.slug - The application slug.
      * @param params.payload - The key value pairs of auth data.
      * @param params.autoClose - Whether to close the authentication window automatically. Defaults to `true`.
+     * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes.
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     private async oauth({
         slug,
         payload,
         autoClose = true,
+        timeout = DEFAULT_CONNECT_TIMEOUT,
     }: OAuthParams): Promise<boolean> {
         const oauthUrl = await this.getOAuthUrl(slug, payload);
 
@@ -562,6 +568,7 @@ class Refold {
             Boolean(app?.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active));
 
         return new Promise((resolve, reject) => {
+            const startedAt = Date.now();
             let inFlight = false;
             let consecutiveFailures = 0;
             let firstFailure: unknown;
@@ -569,10 +576,12 @@ class Refold {
 
             // keep checking connection status
             const interval = setInterval(() => {
-                if (connectWindow.closed) {
+                const timedOut = timeout > 0 && Date.now() - startedAt >= timeout;
+                if (connectWindow.closed || timedOut) {
                     // the connection may complete moments around the window
-                    // closing, so keep polling for a little longer before
-                    // giving up
+                    // closing or the wait timing out, so keep polling for a
+                    // little longer before giving up
+                    if (timedOut && autoClose) connectWindow.close();
                     graceStartedAt ??= Date.now();
                     if (Date.now() - graceStartedAt >= POLL_GRACE) {
                         clearInterval(interval);
@@ -652,6 +661,7 @@ class Refold {
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
      * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
+     * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 5 minutes.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
@@ -660,15 +670,16 @@ class Refold {
         type,
         payload,
         autoClose = true,
+        timeout = DEFAULT_CONNECT_TIMEOUT,
     }: ConnectParams): Promise<boolean> {
         switch (type) {
             case AuthType.OAuth2:
-                return this.oauth({ slug, payload, autoClose });
+                return this.oauth({ slug, payload, autoClose, timeout });
             case AuthType.KeyBased:
                 return this.keybased({ slug, payload });
             default:
                 if (payload) return this.keybased({ slug, payload });
-                return this.oauth({ slug, autoClose });
+                return this.oauth({ slug, autoClose, timeout });
         }
     }
 
