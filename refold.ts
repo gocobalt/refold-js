@@ -382,6 +382,9 @@ export interface Execution {
 
 type Field = any;
 
+/** How often, in milliseconds, connection status is polled during authentication. */
+const POLL_INTERVAL = 3e3;
+
 class Refold {
     private baseUrl: string;
     public token: string;
@@ -541,41 +544,43 @@ class Refold {
         payload,
         autoClose = true,
     }: OAuthParams): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            this.getOAuthUrl(slug, payload)
-            .then(oauthUrl => {
-                const connectWindow = window.open(oauthUrl);
+        const oauthUrl = await this.getOAuthUrl(slug, payload);
 
-                // keep checking connection status
-                const interval = setInterval(() => {
-                    this.getApp(slug)
-                    .then(app => {
-                        if (app && app.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active)) {
-                            // close auth window
-                            if (autoClose) connectWindow?.close();
-                            // clear interval
-                            clearInterval(interval);
-                            // resovle status
-                            resolve(true);
-                        } else {
-                            // user closed oauth window without authenticating
-                            if (connectWindow && connectWindow.closed) {
-                                // clear interval
-                                clearInterval(interval);
-                                // resolve status
-                                resolve(false);
-                            }
-                        }
-                    })
-                    .catch(e => {
-                        console.error(e);
-                        // connectWindow?.close();
+        const connectWindow = window.open(oauthUrl);
+        if (!connectWindow) {
+            throw Object.assign(
+                new Error("The authentication window could not be opened. It may have been blocked by the browser."),
+                { code: "POPUP_BLOCKED" },
+            );
+        }
+
+        const hasActiveOAuthAccount = (app: Application) =>
+            Boolean(app?.connected_accounts?.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active));
+
+        return new Promise((resolve, reject) => {
+            // keep checking connection status
+            const interval = setInterval(() => {
+                this.getApp(slug)
+                .then(app => {
+                    if (hasActiveOAuthAccount(app)) {
+                        // close auth window
+                        if (autoClose) connectWindow.close();
+                        // clear interval
                         clearInterval(interval);
-                        reject(e);
-                    });
-                }, 3e3);
-            })
-            .catch(reject);
+                        // resolve status
+                        resolve(true);
+                    } else if (connectWindow.closed) {
+                        // user closed oauth window without authenticating
+                        clearInterval(interval);
+                        resolve(false);
+                    }
+                })
+                .catch(e => {
+                    console.error(e);
+                    clearInterval(interval);
+                    reject(e);
+                });
+            }, POLL_INTERVAL);
         });
     }
 
