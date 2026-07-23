@@ -28,6 +28,12 @@ export interface Application {
     slug: string;
     /** The categories/tags for the application. */
     tags?: string[];
+    /**
+     * OAuth grant type. Absent ⇒ authorization_code. For `client_credentials`
+     * (machine-to-machine), connecting submits the fields to the server and
+     * opens no browser window.
+     */
+    grant_type?: string;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
         [key in AuthType]: InputField[];
@@ -400,7 +406,7 @@ declare class Refold {
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
      * @returns {Promise<String>} The auth URL where users can authenticate themselves.
      */
-    private getOAuthUrl;
+    private integrate;
     /**
      * Handle OAuth for the specified application.
      * @private

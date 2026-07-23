@@ -149,19 +149,31 @@ class Refold {
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
      * @returns {Promise<String>} The auth URL where users can authenticate themselves.
      */
-    getOAuthUrl(slug, params) {
+    integrate(slug, params, grant) {
         return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v1/${slug}/integrate?${new URLSearchParams(params).toString()}`, {
-                headers: {
-                    authorization: `Bearer ${this.token}`,
-                },
-            });
+            // client-credentials (M2M): submit fields in the body — a private key must
+            // never ride in a GET query string. Redirect grants keep the GET as before.
+            const isClientCredentials = grant === "client_credentials";
+            const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
+            const res = isClientCredentials
+                ? yield fetch(url, {
+                    method: "POST",
+                    headers: {
+                        authorization: `Bearer ${this.token}`,
+                        "content-type": "application/json",
+                    },
+                    body: JSON.stringify(params !== null && params !== void 0 ? params : {}),
+                })
+                : yield fetch(`${url}?${new URLSearchParams(params).toString()}`, {
+                    headers: {
+                        authorization: `Bearer ${this.token}`,
+                    },
+                });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
                 throw error;
             }
-            const data = yield res.json();
-            return data.auth_url;
+            return yield res.json();
         });
     }
     /**
@@ -176,8 +188,14 @@ class Refold {
      */
     oauth(_a) {
         return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
-            const oauthUrl = yield this.getOAuthUrl(slug, payload);
-            const connectWindow = window.open(oauthUrl);
+            const app = yield this.getApp(slug);
+            const data = yield this.integrate(slug, payload, app === null || app === void 0 ? void 0 : app.grant_type);
+            // client-credentials (M2M): the server minted the token during /integrate —
+            // there is no auth_url and no browser step.
+            if (!data.auth_url) {
+                return data.connected === true;
+            }
+            const connectWindow = window.open(data.auth_url);
             if (!connectWindow) {
                 throw Object.assign(new Error("The authentication window could not be opened. It may have been blocked by the browser."), { code: "POPUP_BLOCKED" });
             }

@@ -31,6 +31,12 @@ export interface Application {
     slug: string;
     /** The categories/tags for the application. */
     tags?: string[];
+    /**
+     * OAuth grant type. Absent ⇒ authorization_code. For `client_credentials`
+     * (machine-to-machine), connecting submits the fields to the server and
+     * opens no browser window.
+     */
+    grant_type?: string;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
         /** The fields required from the user to connect the application. */
@@ -522,20 +528,36 @@ class Refold {
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
      * @returns {Promise<String>} The auth URL where users can authenticate themselves.
      */
-    private async getOAuthUrl(slug: string, params?: Record<string, string>): Promise<string> {
-        const res = await fetch(`${this.baseUrl}/api/v1/${slug}/integrate?${new URLSearchParams(params).toString()}`, {
-            headers: {
-                authorization: `Bearer ${this.token}`,
-            },
-        });
+    private async integrate(
+        slug: string,
+        params?: Record<string, string>,
+        grant?: string,
+    ): Promise<{ auth_url?: string; connected?: boolean }> {
+        // client-credentials (M2M): submit fields in the body — a private key must
+        // never ride in a GET query string. Redirect grants keep the GET as before.
+        const isClientCredentials = grant === "client_credentials";
+        const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
+        const res = isClientCredentials
+            ? await fetch(url, {
+                method: "POST",
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify(params ?? {}),
+            })
+            : await fetch(`${url}?${new URLSearchParams(params).toString()}`, {
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                },
+            });
 
         if (res.status >= 400 && res.status < 600) {
             const error = await res.json();
             throw error;
         }
 
-        const data = await res.json();
-        return data.auth_url;
+        return await res.json();
     }
 
     /**
@@ -554,9 +576,16 @@ class Refold {
         autoClose = true,
         timeout = DEFAULT_CONNECT_TIMEOUT,
     }: OAuthParams): Promise<boolean> {
-        const oauthUrl = await this.getOAuthUrl(slug, payload);
+        const app = await this.getApp(slug);
+        const data = await this.integrate(slug, payload, app?.grant_type);
 
-        const connectWindow = window.open(oauthUrl);
+        // client-credentials (M2M): the server minted the token during /integrate —
+        // there is no auth_url and no browser step.
+        if (!data.auth_url) {
+            return data.connected === true;
+        }
+
+        const connectWindow = window.open(data.auth_url);
         if (!connectWindow) {
             throw Object.assign(
                 new Error("The authentication window could not be opened. It may have been blocked by the browser."),
