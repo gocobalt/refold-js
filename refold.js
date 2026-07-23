@@ -142,18 +142,21 @@ class Refold {
         });
     }
     /**
-     * Returns the auth URL that users can use to authenticate themselves to the
-     * specified application.
+     * Starts the connect flow for the specified application against `/integrate`.
+     * Redirect grants (authorization_code / PKCE) return an `auth_url` to open;
+     * client-credentials (M2M) mints server-side and returns `connected`/`success`.
      * @private
      * @param {String} slug The application slug.
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
-     * @returns {Promise<String>} The auth URL where users can authenticate themselves.
+     * @param {String} [grant] The app's OAuth grant type (from the app object).
+     * @returns {Promise<{auth_url?: string, connected?: boolean, success?: boolean}>} The server response.
      */
     integrate(slug, params, grant) {
         return __awaiter(this, void 0, void 0, function* () {
             // client-credentials (M2M): submit fields in the body — a private key must
-            // never ride in a GET query string. Redirect grants keep the GET as before.
-            const isClientCredentials = grant === "client_credentials";
+            // never ride in a GET query string. Force the body path if the payload
+            // carries a private_key even when the grant hint is missing/mismatched.
+            const isClientCredentials = grant === "client_credentials" || !!(params === null || params === void 0 ? void 0 : params.private_key);
             const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
             const res = isClientCredentials
                 ? yield fetch(url, {
@@ -188,12 +191,16 @@ class Refold {
      */
     oauth(_a) {
         return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
-            const app = yield this.getApp(slug);
+            // Read the app's grant to decide the transport; degrade gracefully to the
+            // redirect path if the lookup fails so common auth_code connects aren't
+            // blocked by a getApp hiccup.
+            const app = yield this.getApp(slug).catch(() => undefined);
             const data = yield this.integrate(slug, payload, app === null || app === void 0 ? void 0 : app.grant_type);
-            // client-credentials (M2M): the server minted the token during /integrate —
-            // there is no auth_url and no browser step.
+            // No auth_url ⇒ the server completed the connection without a redirect
+            // (client-credentials / M2M). Report on the server's success signal,
+            // tolerating either field name used across the API.
             if (!data.auth_url) {
-                return data.connected === true;
+                return data.connected === true || data.success === true;
             }
             const connectWindow = window.open(data.auth_url);
             if (!connectWindow) {

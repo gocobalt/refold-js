@@ -399,12 +399,14 @@ declare class Refold {
      */
     getApps(): Promise<Application[]>;
     /**
-     * Returns the auth URL that users can use to authenticate themselves to the
-     * specified application.
+     * Starts the connect flow for the specified application against `/integrate`.
+     * Redirect grants (authorization_code / PKCE) return an `auth_url` to open;
+     * client-credentials (M2M) mints server-side and returns `connected`/`success`.
      * @private
      * @param {String} slug The application slug.
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
-     * @returns {Promise<String>} The auth URL where users can authenticate themselves.
+     * @param {String} [grant] The app's OAuth grant type (from the app object).
+     * @returns {Promise<{auth_url?: string, connected?: boolean, success?: boolean}>} The server response.
      */
     private integrate;
     /**
