@@ -23,7 +23,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Refold = exports.AuthStatus = exports.AuthType = void 0;
+exports.Refold = exports.GrantType = exports.AuthStatus = exports.AuthType = void 0;
 var AuthType;
 (function (AuthType) {
     AuthType["OAuth2"] = "oauth2";
@@ -34,6 +34,13 @@ var AuthStatus;
     AuthStatus["Active"] = "active";
     AuthStatus["Expired"] = "expired";
 })(AuthStatus || (exports.AuthStatus = AuthStatus = {}));
+/** The OAuth grant an application uses. Absent ⇒ {@link GrantType.AuthorizationCode}. */
+var GrantType;
+(function (GrantType) {
+    GrantType["AuthorizationCode"] = "authorization_code";
+    GrantType["AuthorizationCodePKCE"] = "authorization_code_pkce";
+    GrantType["ClientCredentials"] = "client_credentials";
+})(GrantType || (exports.GrantType = GrantType = {}));
 /** How often, in milliseconds, connection status is polled during authentication. */
 const POLL_INTERVAL = 3e3;
 /** How long, in milliseconds, polling continues after the auth window closes or the wait times out, since the connection may complete moments later. */
@@ -143,22 +150,23 @@ class Refold {
     }
     /**
      * Starts the connect flow for the specified application against `/integrate`.
-     * Redirect grants (authorization_code / PKCE) return an `auth_url` to open;
-     * client-credentials (M2M) mints server-side and returns `connected`/`success`.
+     *
+     * Transport is chosen from the application's grant: {@link GrantType.ClientCredentials}
+     * (M2M) submits the fields in the request body so a private key or client
+     * secret never rides in a URL, and the server mints the token and returns
+     * `connected`. Redirect grants (authorization_code / PKCE) carry only
+     * non-secret pre-requisite fields, sent as query parameters, and the server
+     * returns an `auth_url` to open.
      * @private
      * @param {String} slug The application slug.
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
-     * @param {String} [grant] The app's OAuth grant type (from the app object).
-     * @returns {Promise<{auth_url?: string, connected?: boolean, success?: boolean}>} The server response.
+     * @param {GrantType} [grant] The application's OAuth grant. Omit for redirect grants.
+     * @returns {Promise<{auth_url?: string, connected?: boolean}>} The server response.
      */
     integrate(slug, params, grant) {
         return __awaiter(this, void 0, void 0, function* () {
-            // client-credentials (M2M): submit fields in the body — a private key must
-            // never ride in a GET query string. Force the body path if the payload
-            // carries a private_key even when the grant hint is missing/mismatched.
-            const isClientCredentials = grant === "client_credentials" || !!(params === null || params === void 0 ? void 0 : params.private_key);
             const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
-            const res = isClientCredentials
+            const res = grant === GrantType.ClientCredentials
                 ? yield fetch(url, {
                     method: "POST",
                     headers: {
@@ -190,17 +198,16 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     oauth(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
-            // Read the app's grant to decide the transport; degrade gracefully to the
-            // redirect path if the lookup fails so common auth_code connects aren't
-            // blocked by a getApp hiccup.
-            const app = yield this.getApp(slug).catch(() => undefined);
-            const data = yield this.integrate(slug, payload, app === null || app === void 0 ? void 0 : app.grant_type);
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
+            const data = yield this.integrate(slug, payload, grantType);
             // No auth_url ⇒ the server completed the connection without a redirect
-            // (client-credentials / M2M). Report on the server's success signal,
-            // tolerating either field name used across the API.
+            // (client-credentials / M2M); report the outcome it gives us. A response
+            // with neither an auth_url nor a connection result is unexpected — surface
+            // it rather than silently reporting failure.
             if (!data.auth_url) {
-                return data.connected === true || data.success === true;
+                if (typeof data.connected === "boolean")
+                    return data.connected;
+                throw Object.assign(new Error("The server returned neither an authentication URL nor a connection result."), { code: "UNEXPECTED_INTEGRATE_RESPONSE" });
             }
             const connectWindow = window.open(data.auth_url);
             if (!connectWindow) {
@@ -294,22 +301,27 @@ class Refold {
      * @param params.slug - The application slug.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.grantType - The application's OAuth grant. Pass {@link GrantType.ClientCredentials} for machine-to-machine connectors (fields are submitted to the server, no window opens). Omit for redirect grants.
      * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
      * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 5 minutes.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
     connect(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
             switch (type) {
                 case AuthType.OAuth2:
-                    return this.oauth({ slug, payload, autoClose, timeout });
+                    return this.oauth({ slug, payload, grantType, autoClose, timeout });
                 case AuthType.KeyBased:
                     return this.keybased({ slug, payload });
                 default:
+                    // client-credentials (M2M) is OAuth2 but carries a payload, so it
+                    // must not be mistaken for a key-based connect.
+                    if (grantType === GrantType.ClientCredentials)
+                        return this.oauth({ slug, payload, grantType, autoClose, timeout });
                     if (payload)
                         return this.keybased({ slug, payload });
-                    return this.oauth({ slug, autoClose, timeout });
+                    return this.oauth({ slug, grantType, autoClose, timeout });
             }
         });
     }

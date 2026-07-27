@@ -9,6 +9,12 @@ export declare enum AuthStatus {
     Active = "active",
     Expired = "expired"
 }
+/** The OAuth grant an application uses. Absent ⇒ {@link GrantType.AuthorizationCode}. */
+export declare enum GrantType {
+    AuthorizationCode = "authorization_code",
+    AuthorizationCodePKCE = "authorization_code_pkce",
+    ClientCredentials = "client_credentials"
+}
 /** An application in Refold. */
 export interface Application {
     /** Application ID */
@@ -29,11 +35,11 @@ export interface Application {
     /** The categories/tags for the application. */
     tags?: string[];
     /**
-     * OAuth grant type. Absent ⇒ authorization_code. For `client_credentials`
-     * (machine-to-machine), connecting submits the fields to the server and
-     * opens no browser window.
+     * OAuth grant type. Absent ⇒ {@link GrantType.AuthorizationCode}. For
+     * {@link GrantType.ClientCredentials} (machine-to-machine), connecting
+     * submits the fields to the server and opens no browser window.
      */
-    grant_type?: string;
+    grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
         [key in AuthType]: InputField[];
@@ -97,6 +103,13 @@ export interface OAuthParams {
     slug: string;
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
+    /**
+     * The application's OAuth grant (from the app object). Pass
+     * {@link GrantType.ClientCredentials} for machine-to-machine connectors so
+     * their fields are submitted to the server and no browser window is opened.
+     * Omit for redirect grants (authorization_code / PKCE), the default.
+     */
+    grantType?: GrantType;
     /** Whether to close the authentication window automatically. */
     autoClose?: boolean;
     /** Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes. */
@@ -400,13 +413,18 @@ declare class Refold {
     getApps(): Promise<Application[]>;
     /**
      * Starts the connect flow for the specified application against `/integrate`.
-     * Redirect grants (authorization_code / PKCE) return an `auth_url` to open;
-     * client-credentials (M2M) mints server-side and returns `connected`/`success`.
+     *
+     * Transport is chosen from the application's grant: {@link GrantType.ClientCredentials}
+     * (M2M) submits the fields in the request body so a private key or client
+     * secret never rides in a URL, and the server mints the token and returns
+     * `connected`. Redirect grants (authorization_code / PKCE) carry only
+     * non-secret pre-requisite fields, sent as query parameters, and the server
+     * returns an `auth_url` to open.
      * @private
      * @param {String} slug The application slug.
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
-     * @param {String} [grant] The app's OAuth grant type (from the app object).
-     * @returns {Promise<{auth_url?: string, connected?: boolean, success?: boolean}>} The server response.
+     * @param {GrantType} [grant] The application's OAuth grant. Omit for redirect grants.
+     * @returns {Promise<{auth_url?: string, connected?: boolean}>} The server response.
      */
     private integrate;
     /**
@@ -434,12 +452,13 @@ declare class Refold {
      * @param params.slug - The application slug.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.grantType - The application's OAuth grant. Pass {@link GrantType.ClientCredentials} for machine-to-machine connectors (fields are submitted to the server, no window opens). Omit for redirect grants.
      * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
      * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 5 minutes.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
-    connect({ slug, type, payload, autoClose, timeout, }: ConnectParams): Promise<boolean>;
+    connect({ slug, type, payload, grantType, autoClose, timeout, }: ConnectParams): Promise<boolean>;
     /**
      * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
