@@ -12,6 +12,13 @@ export enum AuthStatus {
     Expired = "expired",
 }
 
+/** The OAuth grant an application uses. Absent ⇒ {@link GrantType.AuthorizationCode}. */
+export enum GrantType {
+    AuthorizationCode = "authorization_code",
+    AuthorizationCodePKCE = "authorization_code_pkce",
+    ClientCredentials = "client_credentials",
+}
+
 /** An application in Refold. */
 export interface Application {
     /** Application ID */
@@ -31,6 +38,14 @@ export interface Application {
     slug: string;
     /** The categories/tags for the application. */
     tags?: string[];
+    /**
+     * OAuth grant type. Absent ⇒ {@link GrantType.AuthorizationCode}. Pass this
+     * to {@link Refold.connect} as {@link OAuthParams.grantType}; for
+     * {@link GrantType.ClientCredentials} (machine-to-machine) `connect()` routes
+     * to the OAuth path regardless of `type`, submits the fields to the server,
+     * and opens no browser window.
+     */
+    grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
         /** The fields required from the user to connect the application. */
@@ -97,6 +112,13 @@ export interface OAuthParams {
     slug: string;
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
+    /**
+     * The application's OAuth grant (from the app object). Pass
+     * {@link GrantType.ClientCredentials} for machine-to-machine connectors so
+     * their fields are submitted to the server and no browser window is opened.
+     * Omit for redirect grants (authorization_code / PKCE), the default.
+     */
+    grantType?: GrantType;
     /** Whether to close the authentication window automatically. */
     autoClose?: boolean;
     /** Maximum time in milliseconds to wait for authentication before giving up. Set to `0` to wait indefinitely. Defaults to 5 minutes. */
@@ -515,27 +537,47 @@ class Refold {
     }
 
     /**
-     * Returns the auth URL that users can use to authenticate themselves to the
-     * specified application.
+     * Starts the connect flow for the specified application against `/integrate`.
+     *
+     * Transport is chosen from the application's grant: {@link GrantType.ClientCredentials}
+     * (M2M) submits the fields in the request body so a private key or client
+     * secret never rides in a URL, and the server mints the token and returns
+     * `connected`. Redirect grants (authorization_code / PKCE) carry only
+     * non-secret pre-requisite fields, sent as query parameters, and the server
+     * returns an `auth_url` to open.
      * @private
      * @param {String} slug The application slug.
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
-     * @returns {Promise<String>} The auth URL where users can authenticate themselves.
+     * @param {GrantType} [grant] The application's OAuth grant. Omit for redirect grants.
+     * @returns {Promise<{auth_url?: string, connected?: boolean}>} The server response.
      */
-    private async getOAuthUrl(slug: string, params?: Record<string, string>): Promise<string> {
-        const res = await fetch(`${this.baseUrl}/api/v1/${slug}/integrate?${new URLSearchParams(params).toString()}`, {
-            headers: {
-                authorization: `Bearer ${this.token}`,
-            },
-        });
+    private async integrate(
+        slug: string,
+        params?: Record<string, string>,
+        grant?: GrantType,
+    ): Promise<{ auth_url?: string; connected?: boolean }> {
+        const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
+        const res = grant === GrantType.ClientCredentials
+            ? await fetch(url, {
+                method: "POST",
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify(params ?? {}),
+            })
+            : await fetch(`${url}?${new URLSearchParams(params).toString()}`, {
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                },
+            });
 
         if (res.status >= 400 && res.status < 600) {
             const error = await res.json();
             throw error;
         }
 
-        const data = await res.json();
-        return data.auth_url;
+        return await res.json();
     }
 
     /**
@@ -551,12 +593,25 @@ class Refold {
     private async oauth({
         slug,
         payload,
+        grantType,
         autoClose = true,
         timeout = DEFAULT_CONNECT_TIMEOUT,
     }: OAuthParams): Promise<boolean> {
-        const oauthUrl = await this.getOAuthUrl(slug, payload);
+        const data = await this.integrate(slug, payload, grantType);
 
-        const connectWindow = window.open(oauthUrl);
+        // No auth_url ⇒ the server completed the connection without a redirect
+        // (client-credentials / M2M); report the outcome it gives us. A response
+        // with neither an auth_url nor a connection result is unexpected — surface
+        // it rather than silently reporting failure.
+        if (!data.auth_url) {
+            if (typeof data.connected === "boolean") return data.connected;
+            throw Object.assign(
+                new Error("The server returned neither an authentication URL nor a connection result."),
+                { code: "UNEXPECTED_INTEGRATE_RESPONSE" },
+            );
+        }
+
+        const connectWindow = window.open(data.auth_url);
         if (!connectWindow) {
             throw Object.assign(
                 new Error("The authentication window could not be opened. It may have been blocked by the browser."),
@@ -660,6 +715,7 @@ class Refold {
      * @param params.slug - The application slug.
      * @param params.type - The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`.
      * @param params.payload - key-value pairs of authentication data required for the specified auth type.
+     * @param params.grantType - The application's OAuth grant. Pass {@link GrantType.ClientCredentials} for machine-to-machine connectors (fields are submitted to the server, no window opens). Omit for redirect grants.
      * @param params.autoClose - Whether to close the authentication window automatically. If not provided, it defaults to `true`.
      * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 5 minutes.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
@@ -669,17 +725,22 @@ class Refold {
         slug,
         type,
         payload,
+        grantType,
         autoClose = true,
         timeout = DEFAULT_CONNECT_TIMEOUT,
     }: ConnectParams): Promise<boolean> {
         switch (type) {
             case AuthType.OAuth2:
-                return this.oauth({ slug, payload, autoClose, timeout });
+                return this.oauth({ slug, payload, grantType, autoClose, timeout });
             case AuthType.KeyBased:
                 return this.keybased({ slug, payload });
             default:
+                // client-credentials (M2M) is OAuth2 but carries a payload, so it
+                // must not be mistaken for a key-based connect.
+                if (grantType === GrantType.ClientCredentials)
+                    return this.oauth({ slug, payload, grantType, autoClose, timeout });
                 if (payload) return this.keybased({ slug, payload });
-                return this.oauth({ slug, autoClose, timeout });
+                return this.oauth({ slug, grantType, autoClose, timeout });
         }
     }
 
