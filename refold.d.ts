@@ -35,9 +35,11 @@ export interface Application {
     /** The categories/tags for the application. */
     tags?: string[];
     /**
-     * OAuth grant type. Absent ⇒ {@link GrantType.AuthorizationCode}. For
-     * {@link GrantType.ClientCredentials} (machine-to-machine), connecting
-     * submits the fields to the server and opens no browser window.
+     * OAuth grant type. Absent ⇒ {@link GrantType.AuthorizationCode}. Pass this
+     * to {@link Refold.connect} as {@link OAuthParams.grantType}; for
+     * {@link GrantType.ClientCredentials} (machine-to-machine) `connect()` routes
+     * to the OAuth path regardless of `type`, submits the fields to the server,
+     * and opens no browser window.
      */
     grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
