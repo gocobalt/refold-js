@@ -48,7 +48,9 @@ const refold = new Refold({ token?: string, baseUrl?: string })
 
 **Connection:**
 - `connect({ slug, type?, payload?, grantType?, autoClose?, timeout? }): Promise<boolean>` — Connect app (OAuth2 redirect popup, OAuth2 client-credentials/M2M, or key-based POST). `grantType` (an exported `GrantType`) selects the OAuth transport: `client_credentials` submits the fields to the server and returns without opening a window; omit (or a redirect grant) uses the popup flow. Passing `grantType: GrantType.ClientCredentials` routes to the OAuth path even when a payload is present. `autoClose` (default `true`) closes the OAuth popup on success; `timeout` (default 5 minutes, `0` to wait indefinitely) caps the OAuth popup wait. `autoClose`/`timeout` apply only to the redirect popup flow. Param type: exported `ConnectParams` (extends `OAuthParams`).
-- `disconnect(slug, type?): Promise<unknown>` — Disconnect app
+- `disconnect(slug, type?, kind?): Promise<unknown>` — Disconnect app
+
+**Universal connectors:** connectors (`Application.kind === "universal_connector"`) authenticate through their own endpoints under `/api/v1/auth-service/f-sdk/universal-connector/:slug` — `integrate` (OAuth), `save-credentials` (key-based), `revoke` (disconnect) — instead of the native/custom app routes. `connect()`/`disconnect()` route on `kind`: pass it (an exported `ConnectorKind`, from the app object) to skip the lookup, or omit it and the SDK resolves the kind via `getApp(slug)`. A failed lookup falls back to the native path so an unrelated outage can't misroute a native connect.
 
 **Configuration:**
 - `config(payload): Promise<Config>` — Create/get config

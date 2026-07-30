@@ -20,9 +20,18 @@ export enum GrantType {
 }
 
 /** An application in Refold. */
+/**
+ * What kind of connector an application is. Universal connectors are configured in
+ * Refold rather than shipped as native integrations, and authenticate through their
+ * own endpoints — {@link Refold.connect} and {@link Refold.disconnect} route on this.
+ */
+export type ConnectorKind = "native" | "custom" | "universal_connector";
+
 export interface Application {
     /** Application ID */
     app_id: string;
+    /** Whether this is a native app, a custom app, or a universal connector. */
+    kind?: ConnectorKind;
     /**The application name. */
     name: string;
     /**The application description. */
@@ -113,6 +122,12 @@ export interface OAuthParams {
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
     /**
+     * The connector kind (from the app object's {@link Application.kind}). Universal
+     * connectors authenticate through their own endpoints, so pass this to skip the
+     * lookup. Omit it and the SDK resolves the kind from the app itself.
+     */
+    kind?: ConnectorKind;
+    /**
      * The application's OAuth grant (from the app object). Pass
      * {@link GrantType.ClientCredentials} for machine-to-machine connectors so
      * their fields are submitted to the server and no browser window is opened.
@@ -130,6 +145,11 @@ export interface KeyBasedParams {
     slug: string;
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
+    /**
+     * The connector kind (from the app object's {@link Application.kind}). Pass it to
+     * skip the lookup; omit it and the SDK resolves the kind from the app itself.
+     */
+    kind?: ConnectorKind;
 }
 
 export interface ConnectParams extends OAuthParams {
@@ -536,6 +556,28 @@ class Refold {
         return data;
     }
 
+    /** Base path for a universal connector's own auth endpoints. */
+    private universalConnectorUrl(slug: string): string {
+        return `${this.baseUrl}/api/v1/auth-service/f-sdk/universal-connector/${encodeURIComponent(slug)}`;
+    }
+
+    /**
+     * Whether a slug is a universal connector. Trusts an explicitly supplied `kind`
+     * (no request); otherwise resolves it from the app. A failed lookup falls back to
+     * `false` so an unrelated outage can't turn a native connect into a wrong-endpoint
+     * call — the native path then reports the real error.
+     * @private
+     */
+    private async isUniversalConnector(slug: string, kind?: ConnectorKind): Promise<boolean> {
+        if (kind) return kind === "universal_connector";
+        try {
+            const app = await this.getApp(slug);
+            return app?.kind === "universal_connector";
+        } catch {
+            return false;
+        }
+    }
+
     /**
      * Starts the connect flow for the specified application against `/integrate`.
      *
@@ -555,8 +597,11 @@ class Refold {
         slug: string,
         params?: Record<string, string>,
         grant?: GrantType,
+        kind?: ConnectorKind,
     ): Promise<{ auth_url?: string; connected?: boolean }> {
-        const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
+        const url = await this.isUniversalConnector(slug, kind)
+            ? `${this.universalConnectorUrl(slug)}/integrate`
+            : `${this.baseUrl}/api/v1/${slug}/integrate`;
         const res = grant === GrantType.ClientCredentials
             ? await fetch(url, {
                 method: "POST",
@@ -594,10 +639,11 @@ class Refold {
         slug,
         payload,
         grantType,
+        kind,
         autoClose = true,
         timeout = DEFAULT_CONNECT_TIMEOUT,
     }: OAuthParams): Promise<boolean> {
-        const data = await this.integrate(slug, payload, grantType);
+        const data = await this.integrate(slug, payload, grantType, kind);
 
         // No auth_url ⇒ the server completed the connection without a redirect
         // (client-credentials / M2M); report the outcome it gives us. A response
@@ -688,8 +734,13 @@ class Refold {
     private async keybased({
         slug,
         payload,
+        kind,
     }: KeyBasedParams): Promise<boolean> {
-        const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
+        // Universal connectors store credentials through their own endpoint.
+        const url = await this.isUniversalConnector(slug, kind)
+            ? `${this.universalConnectorUrl(slug)}/save-credentials`
+            : `${this.baseUrl}/api/v2/app/${slug}/save`;
+        const res = await fetch(url, {
             method: "POST",
             headers: {
                 authorization: `Bearer ${this.token}`,
@@ -726,21 +777,22 @@ class Refold {
         type,
         payload,
         grantType,
+        kind,
         autoClose = true,
         timeout = DEFAULT_CONNECT_TIMEOUT,
     }: ConnectParams): Promise<boolean> {
         switch (type) {
             case AuthType.OAuth2:
-                return this.oauth({ slug, payload, grantType, autoClose, timeout });
+                return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
             case AuthType.KeyBased:
-                return this.keybased({ slug, payload });
+                return this.keybased({ slug, payload, kind });
             default:
                 // client-credentials (M2M) is OAuth2 but carries a payload, so it
                 // must not be mistaken for a key-based connect.
                 if (grantType === GrantType.ClientCredentials)
-                    return this.oauth({ slug, payload, grantType, autoClose, timeout });
-                if (payload) return this.keybased({ slug, payload });
-                return this.oauth({ slug, grantType, autoClose, timeout });
+                    return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
+                if (payload) return this.keybased({ slug, payload, kind });
+                return this.oauth({ slug, grantType, kind, autoClose, timeout });
         }
     }
 
@@ -748,10 +800,20 @@ class Refold {
      * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
+     * @param {ConnectorKind} [kind] The connector kind (from the app object). Pass it to skip the lookup.
      * @returns {Promise<unknown>}
      */
-    public async disconnect(slug: string, type?: AuthType): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
+    public async disconnect(slug: string, type?: AuthType, kind?: ConnectorKind): Promise<unknown> {
+        // Universal connectors revoke through their own endpoint.
+        const isConnector = await this.isUniversalConnector(slug, kind);
+        const res = isConnector
+            ? await fetch(`${this.universalConnectorUrl(slug)}/revoke`, {
+                method: "POST",
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                },
+            })
+            : await fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
             method: "DELETE",
             headers: {
                 authorization: `Bearer ${this.token}`,
