@@ -52,7 +52,13 @@ export interface Application {
     grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
-        [key in AuthType]: InputField[];
+        /**
+         * The fields required from the user to connect the application, keyed by auth
+         * type. Native apps use {@link AuthType} (`oauth2` / `keybased`); universal
+         * connectors key by their own supported types (`api_key`, `basic_auth`,
+         * `bearer_token`, `oauth2`) and may offer several for the user to choose from.
+         */
+        [authType: string]: InputField[];
     };
     /** The list of connected accounts for this application */
     connected_accounts?: {
@@ -141,10 +147,22 @@ export interface KeyBasedParams {
      * skip the lookup; omit it and the SDK resolves the kind from the app itself.
      */
     kind?: ConnectorKind;
+    /**
+     * The auth type being submitted, as named by the application's
+     * {@link Application.auth_type_options}. Universal connectors distinguish
+     * `api_key` / `basic_auth` / `bearer_token`, so a connector offering more than one
+     * cannot be resolved from the credentials alone.
+     */
+    authType?: string;
 }
 export interface ConnectParams extends OAuthParams {
-    /** The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`. */
-    type?: AuthType;
+    /**
+     * The authentication type to use — an {@link AuthType} for native applications, or
+     * one of a universal connector's own types (a key of
+     * {@link Application.auth_type_options}). If not provided, it defaults to `keybased`
+     * when a payload is given, otherwise `oauth2`.
+     */
+    type?: AuthType | string;
 }
 /** The payload object for config. */
 export interface ConfigPayload {

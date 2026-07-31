@@ -57,8 +57,13 @@ export interface Application {
     grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
-        /** The fields required from the user to connect the application. */
-        [key in AuthType]: InputField[];
+        /**
+         * The fields required from the user to connect the application, keyed by auth
+         * type. Native apps use {@link AuthType} (`oauth2` / `keybased`); universal
+         * connectors key by their own supported types (`api_key`, `basic_auth`,
+         * `bearer_token`, `oauth2`) and may offer several for the user to choose from.
+         */
+        [authType: string]: InputField[];
     };
     /** The list of connected accounts for this application */
     connected_accounts?: {
@@ -150,11 +155,23 @@ export interface KeyBasedParams {
      * skip the lookup; omit it and the SDK resolves the kind from the app itself.
      */
     kind?: ConnectorKind;
+    /**
+     * The auth type being submitted, as named by the application's
+     * {@link Application.auth_type_options}. Universal connectors distinguish
+     * `api_key` / `basic_auth` / `bearer_token`, so a connector offering more than one
+     * cannot be resolved from the credentials alone.
+     */
+    authType?: string;
 }
 
 export interface ConnectParams extends OAuthParams {
-    /** The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`. */
-    type?: AuthType;
+    /**
+     * The authentication type to use — an {@link AuthType} for native applications, or
+     * one of a universal connector's own types (a key of
+     * {@link Application.auth_type_options}). If not provided, it defaults to `keybased`
+     * when a payload is given, otherwise `oauth2`.
+     */
+    type?: AuthType | string;
 }
 
 /** The payload object for config. */
@@ -735,9 +752,13 @@ class Refold {
         slug,
         payload,
         kind,
+        authType,
     }: KeyBasedParams): Promise<boolean> {
-        // Universal connectors store credentials through their own endpoint.
-        const url = await this.isUniversalConnector(slug, kind)
+        // Universal connectors store credentials through their own endpoint, and it
+        // takes a different body: the auth type is explicit (a connector may offer
+        // several key-based types) and the credentials are nested rather than spread.
+        const isConnector = await this.isUniversalConnector(slug, kind);
+        const url = isConnector
             ? `${this.universalConnectorUrl(slug)}/save-credentials`
             : `${this.baseUrl}/api/v2/app/${slug}/save`;
         const res = await fetch(url, {
@@ -746,9 +767,14 @@ class Refold {
                 authorization: `Bearer ${this.token}`,
                 "content-type": "application/json",
             },
-            body: JSON.stringify({
-                ...payload,
-            }),
+            body: isConnector
+                ? JSON.stringify({
+                    auth_type: authType ?? AuthType.KeyBased,
+                    credentials: payload ?? {},
+                })
+                : JSON.stringify({
+                    ...payload,
+                }),
         });
 
         if (res.status >= 400 && res.status < 600) {
@@ -785,13 +811,13 @@ class Refold {
             case AuthType.OAuth2:
                 return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
             case AuthType.KeyBased:
-                return this.keybased({ slug, payload, kind });
+                return this.keybased({ slug, payload, kind, authType: type });
             default:
                 // client-credentials (M2M) is OAuth2 but carries a payload, so it
                 // must not be mistaken for a key-based connect.
                 if (grantType === GrantType.ClientCredentials)
                     return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
-                if (payload) return this.keybased({ slug, payload, kind });
+                if (payload) return this.keybased({ slug, payload, kind, authType: type });
                 return this.oauth({ slug, grantType, kind, autoClose, timeout });
         }
     }

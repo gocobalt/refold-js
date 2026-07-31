@@ -304,9 +304,12 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
     keybased(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, kind, }) {
-            // Universal connectors store credentials through their own endpoint.
-            const url = (yield this.isUniversalConnector(slug, kind))
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, kind, authType, }) {
+            // Universal connectors store credentials through their own endpoint, and it
+            // takes a different body: the auth type is explicit (a connector may offer
+            // several key-based types) and the credentials are nested rather than spread.
+            const isConnector = yield this.isUniversalConnector(slug, kind);
+            const url = isConnector
                 ? `${this.universalConnectorUrl(slug)}/save-credentials`
                 : `${this.baseUrl}/api/v2/app/${slug}/save`;
             const res = yield fetch(url, {
@@ -315,7 +318,12 @@ class Refold {
                     authorization: `Bearer ${this.token}`,
                     "content-type": "application/json",
                 },
-                body: JSON.stringify(Object.assign({}, payload)),
+                body: isConnector
+                    ? JSON.stringify({
+                        auth_type: authType !== null && authType !== void 0 ? authType : AuthType.KeyBased,
+                        credentials: payload !== null && payload !== void 0 ? payload : {},
+                    })
+                    : JSON.stringify(Object.assign({}, payload)),
             });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
@@ -343,14 +351,14 @@ class Refold {
                 case AuthType.OAuth2:
                     return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
                 case AuthType.KeyBased:
-                    return this.keybased({ slug, payload, kind });
+                    return this.keybased({ slug, payload, kind, authType: type });
                 default:
                     // client-credentials (M2M) is OAuth2 but carries a payload, so it
                     // must not be mistaken for a key-based connect.
                     if (grantType === GrantType.ClientCredentials)
                         return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
                     if (payload)
-                        return this.keybased({ slug, payload, kind });
+                        return this.keybased({ slug, payload, kind, authType: type });
                     return this.oauth({ slug, grantType, kind, autoClose, timeout });
             }
         });
