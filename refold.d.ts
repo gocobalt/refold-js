@@ -120,12 +120,6 @@ export interface OAuthParams {
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
     /**
-     * The connector kind (from the app object's {@link Application.kind}). Universal
-     * connectors authenticate through their own endpoints, so pass this to skip the
-     * lookup. Omit it and the SDK resolves the kind from the app itself.
-     */
-    kind?: ConnectorKind;
-    /**
      * The application's OAuth grant (from the app object). Pass
      * {@link GrantType.ClientCredentials} for machine-to-machine connectors so
      * their fields are submitted to the server and no browser window is opened.
@@ -142,11 +136,6 @@ export interface KeyBasedParams {
     slug: string;
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
-    /**
-     * The connector kind (from the app object's {@link Application.kind}). Pass it to
-     * skip the lookup; omit it and the SDK resolves the kind from the app itself.
-     */
-    kind?: ConnectorKind;
     /**
      * The auth type being submitted, as named by the application's
      * {@link Application.auth_type_options}. Universal connectors distinguish
@@ -450,16 +439,6 @@ declare class Refold {
      * @returns {Promise<Application[]>} The list of applications.
      */
     getApps(): Promise<Application[]>;
-    /** Base path for a universal connector's own auth endpoints. */
-    private universalConnectorUrl;
-    /**
-     * Whether a slug is a universal connector. Trusts an explicitly supplied `kind`
-     * (no request); otherwise resolves it from the app. A failed lookup falls back to
-     * `false` so an unrelated outage can't turn a native connect into a wrong-endpoint
-     * call — the native path then reports the real error.
-     * @private
-     */
-    private isUniversalConnector;
     /**
      * Starts the connect flow for the specified application against `/integrate`.
      *
@@ -507,15 +486,14 @@ declare class Refold {
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
-    connect({ slug, type, payload, grantType, kind, autoClose, timeout, }: ConnectParams): Promise<boolean>;
+    connect({ slug, type, payload, grantType, autoClose, timeout, }: ConnectParams): Promise<boolean>;
     /**
      * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
-     * @param {ConnectorKind} [kind] The connector kind (from the app object). Pass it to skip the lookup.
      * @returns {Promise<unknown>}
      */
-    disconnect(slug: string, type?: AuthType, kind?: ConnectorKind): Promise<unknown>;
+    disconnect(slug: string, type?: AuthType): Promise<unknown>;
     /**
      * Returns the specified config, or creates one if it doesn't exist.
      * @param {ConfigPayload} payload The payload object for config.

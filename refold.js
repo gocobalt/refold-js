@@ -148,30 +148,6 @@ class Refold {
             return data;
         });
     }
-    /** Base path for a universal connector's own auth endpoints. */
-    universalConnectorUrl(slug) {
-        return `${this.baseUrl}/api/v1/auth-service/f-sdk/universal-connector/${encodeURIComponent(slug)}`;
-    }
-    /**
-     * Whether a slug is a universal connector. Trusts an explicitly supplied `kind`
-     * (no request); otherwise resolves it from the app. A failed lookup falls back to
-     * `false` so an unrelated outage can't turn a native connect into a wrong-endpoint
-     * call — the native path then reports the real error.
-     * @private
-     */
-    isUniversalConnector(slug, kind) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (kind)
-                return kind === "universal_connector";
-            try {
-                const app = yield this.getApp(slug);
-                return (app === null || app === void 0 ? void 0 : app.kind) === "universal_connector";
-            }
-            catch (_a) {
-                return false;
-            }
-        });
-    }
     /**
      * Starts the connect flow for the specified application against `/integrate`.
      *
@@ -187,11 +163,9 @@ class Refold {
      * @param {GrantType} [grant] The application's OAuth grant. Omit for redirect grants.
      * @returns {Promise<{auth_url?: string, connected?: boolean}>} The server response.
      */
-    integrate(slug, params, grant, kind) {
+    integrate(slug, params, grant) {
         return __awaiter(this, void 0, void 0, function* () {
-            const url = (yield this.isUniversalConnector(slug, kind))
-                ? `${this.universalConnectorUrl(slug)}/integrate`
-                : `${this.baseUrl}/api/v1/${slug}/integrate`;
+            const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
             const res = grant === GrantType.ClientCredentials
                 ? yield fetch(url, {
                     method: "POST",
@@ -224,8 +198,8 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     oauth(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, grantType, kind, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
-            const data = yield this.integrate(slug, payload, grantType, kind);
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
+            const data = yield this.integrate(slug, payload, grantType);
             // No auth_url ⇒ the server completed the connection without a redirect
             // (client-credentials / M2M); report the outcome it gives us. A response
             // with neither an auth_url nor a connection result is unexpected — surface
@@ -304,26 +278,19 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
     keybased(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, kind, authType, }) {
-            // Universal connectors store credentials through their own endpoint, and it
-            // takes a different body: the auth type is explicit (a connector may offer
-            // several key-based types) and the credentials are nested rather than spread.
-            const isConnector = yield this.isUniversalConnector(slug, kind);
-            const url = isConnector
-                ? `${this.universalConnectorUrl(slug)}/save-credentials`
-                : `${this.baseUrl}/api/v2/app/${slug}/save`;
-            const res = yield fetch(url, {
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, authType, }) {
+            // A connector offering several key-based types needs to be told which one; the generic
+            // `keybased` is not one of them, so it is not forwarded and an application's body stays
+            // exactly the credentials it always was. A connector with a single key-based type has
+            // it inferred server-side.
+            const connectorAuthType = authType && authType !== AuthType.KeyBased ? authType : undefined;
+            const res = yield fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
                 method: "POST",
                 headers: {
                     authorization: `Bearer ${this.token}`,
                     "content-type": "application/json",
                 },
-                body: isConnector
-                    ? JSON.stringify({
-                        auth_type: authType !== null && authType !== void 0 ? authType : AuthType.KeyBased,
-                        credentials: payload !== null && payload !== void 0 ? payload : {},
-                    })
-                    : JSON.stringify(Object.assign({}, payload)),
+                body: JSON.stringify(Object.assign(Object.assign({}, payload), (connectorAuthType ? { auth_type: connectorAuthType } : {}))),
             });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
@@ -346,20 +313,20 @@ class Refold {
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
     connect(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, grantType, kind, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
             switch (type) {
                 case AuthType.OAuth2:
-                    return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
+                    return this.oauth({ slug, payload, grantType, autoClose, timeout });
                 case AuthType.KeyBased:
-                    return this.keybased({ slug, payload, kind, authType: type });
+                    return this.keybased({ slug, payload, authType: type });
                 default:
                     // client-credentials (M2M) is OAuth2 but carries a payload, so it
                     // must not be mistaken for a key-based connect.
                     if (grantType === GrantType.ClientCredentials)
-                        return this.oauth({ slug, payload, grantType, kind, autoClose, timeout });
+                        return this.oauth({ slug, payload, grantType, autoClose, timeout });
                     if (payload)
-                        return this.keybased({ slug, payload, kind, authType: type });
-                    return this.oauth({ slug, grantType, kind, autoClose, timeout });
+                        return this.keybased({ slug, payload, authType: type });
+                    return this.oauth({ slug, grantType, autoClose, timeout });
             }
         });
     }
@@ -367,26 +334,16 @@ class Refold {
      * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
-     * @param {ConnectorKind} [kind] The connector kind (from the app object). Pass it to skip the lookup.
      * @returns {Promise<unknown>}
      */
-    disconnect(slug, type, kind) {
+    disconnect(slug, type) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Universal connectors revoke through their own endpoint.
-            const isConnector = yield this.isUniversalConnector(slug, kind);
-            const res = isConnector
-                ? yield fetch(`${this.universalConnectorUrl(slug)}/revoke`, {
-                    method: "POST",
-                    headers: {
-                        authorization: `Bearer ${this.token}`,
-                    },
-                })
-                : yield fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
-                    method: "DELETE",
-                    headers: {
-                        authorization: `Bearer ${this.token}`,
-                    },
-                });
+            const res = yield fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
+                method: "DELETE",
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                },
+            });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
                 throw error;
