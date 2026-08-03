@@ -64,13 +64,7 @@ export interface Application {
     grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
-        /**
-         * The fields required from the user to connect the application, keyed by auth
-         * type. Native apps use {@link AuthType} (`oauth2` / `keybased`); universal
-         * connectors key by their own supported types (`api_key`, `basic_auth`,
-         * `bearer_token`, `oauth2`) and may offer several for the user to choose from.
-         */
-        [authType: string]: InputField[];
+        [authType in AuthType | ConnectorAuthType]?: InputField[];
     };
     /** The list of connected accounts for this application */
     connected_accounts?: {

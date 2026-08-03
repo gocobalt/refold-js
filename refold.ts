@@ -73,10 +73,11 @@ export interface Application {
         /**
          * The fields required from the user to connect the application, keyed by auth
          * type. Native apps use {@link AuthType} (`oauth2` / `keybased`); universal
-         * connectors key by their own supported types (`api_key`, `basic_auth`,
-         * `bearer_token`, `oauth2`) and may offer several for the user to choose from.
+         * connectors key by their own {@link ConnectorAuthType} (`api_key`,
+         * `basic_auth`, `bearer_token`, `oauth2`) and may offer several for the user to
+         * choose from. Keys are optional because which ones appear depends on the kind.
          */
-        [authType: string]: InputField[];
+        [authType in AuthType | ConnectorAuthType]?: InputField[];
     };
     /** The list of connected accounts for this application */
     connected_accounts?: {
