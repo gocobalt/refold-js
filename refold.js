@@ -23,12 +23,25 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Refold = exports.GrantType = exports.AuthStatus = exports.AuthType = void 0;
+exports.Refold = exports.GrantType = exports.AuthStatus = exports.ConnectorAuthType = exports.AuthType = void 0;
 var AuthType;
 (function (AuthType) {
     AuthType["OAuth2"] = "oauth2";
     AuthType["KeyBased"] = "keybased";
 })(AuthType || (exports.AuthType = AuthType = {}));
+/**
+ * The auth types a universal connector can offer, as keyed in
+ * {@link Application.auth_type_options}. A native application is only ever an
+ * {@link AuthType}; a connector names its own and may support several, so the caller has
+ * to say which one it is submitting.
+ */
+var ConnectorAuthType;
+(function (ConnectorAuthType) {
+    ConnectorAuthType["OAuth2"] = "oauth2";
+    ConnectorAuthType["ApiKey"] = "api_key";
+    ConnectorAuthType["BasicAuth"] = "basic_auth";
+    ConnectorAuthType["BearerToken"] = "bearer_token";
+})(ConnectorAuthType || (exports.ConnectorAuthType = ConnectorAuthType = {}));
 var AuthStatus;
 (function (AuthStatus) {
     AuthStatus["Active"] = "active";

@@ -5,6 +5,18 @@ export declare enum AuthType {
     OAuth2 = "oauth2",
     KeyBased = "keybased"
 }
+/**
+ * The auth types a universal connector can offer, as keyed in
+ * {@link Application.auth_type_options}. A native application is only ever an
+ * {@link AuthType}; a connector names its own and may support several, so the caller has
+ * to say which one it is submitting.
+ */
+export declare enum ConnectorAuthType {
+    OAuth2 = "oauth2",
+    ApiKey = "api_key",
+    BasicAuth = "basic_auth",
+    BearerToken = "bearer_token"
+}
 export declare enum AuthStatus {
     Active = "active",
     Expired = "expired"
@@ -142,7 +154,7 @@ export interface KeyBasedParams {
      * `api_key` / `basic_auth` / `bearer_token`, so a connector offering more than one
      * cannot be resolved from the credentials alone.
      */
-    authType?: string;
+    authType?: AuthType | ConnectorAuthType;
 }
 export interface ConnectParams extends OAuthParams {
     /**
@@ -151,7 +163,7 @@ export interface ConnectParams extends OAuthParams {
      * {@link Application.auth_type_options}). If not provided, it defaults to `keybased`
      * when a payload is given, otherwise `oauth2`.
      */
-    type?: AuthType | string;
+    type?: AuthType | ConnectorAuthType;
 }
 /** The payload object for config. */
 export interface ConfigPayload {
