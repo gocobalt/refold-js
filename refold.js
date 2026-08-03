@@ -23,12 +23,25 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Refold = exports.GrantType = exports.AuthStatus = exports.AuthType = void 0;
+exports.Refold = exports.GrantType = exports.AuthStatus = exports.ConnectorAuthType = exports.AuthType = void 0;
 var AuthType;
 (function (AuthType) {
     AuthType["OAuth2"] = "oauth2";
     AuthType["KeyBased"] = "keybased";
 })(AuthType || (exports.AuthType = AuthType = {}));
+/**
+ * The auth types a universal connector can offer, as keyed in
+ * {@link Application.auth_type_options}. A native application is only ever an
+ * {@link AuthType}; a connector names its own and may support several, so the caller has
+ * to say which one it is submitting.
+ */
+var ConnectorAuthType;
+(function (ConnectorAuthType) {
+    ConnectorAuthType["OAuth2"] = "oauth2";
+    ConnectorAuthType["ApiKey"] = "api_key";
+    ConnectorAuthType["BasicAuth"] = "basic_auth";
+    ConnectorAuthType["BearerToken"] = "bearer_token";
+})(ConnectorAuthType || (exports.ConnectorAuthType = ConnectorAuthType = {}));
 var AuthStatus;
 (function (AuthStatus) {
     AuthStatus["Active"] = "active";
@@ -278,14 +291,19 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
     keybased(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, authType, }) {
+            // A connector offering several key-based types needs to be told which one; the generic
+            // `keybased` is not one of them, so it is not forwarded and an application's body stays
+            // exactly the credentials it always was. A connector with a single key-based type has
+            // it inferred server-side.
+            const connectorAuthType = authType && authType !== AuthType.KeyBased ? authType : undefined;
             const res = yield fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
                 method: "POST",
                 headers: {
                     authorization: `Bearer ${this.token}`,
                     "content-type": "application/json",
                 },
-                body: JSON.stringify(Object.assign({}, payload)),
+                body: JSON.stringify(Object.assign(Object.assign({}, payload), (connectorAuthType ? { auth_type: connectorAuthType } : {}))),
             });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
@@ -313,14 +331,14 @@ class Refold {
                 case AuthType.OAuth2:
                     return this.oauth({ slug, payload, grantType, autoClose, timeout });
                 case AuthType.KeyBased:
-                    return this.keybased({ slug, payload });
+                    return this.keybased({ slug, payload, authType: type });
                 default:
                     // client-credentials (M2M) is OAuth2 but carries a payload, so it
                     // must not be mistaken for a key-based connect.
                     if (grantType === GrantType.ClientCredentials)
                         return this.oauth({ slug, payload, grantType, autoClose, timeout });
                     if (payload)
-                        return this.keybased({ slug, payload });
+                        return this.keybased({ slug, payload, authType: type });
                     return this.oauth({ slug, grantType, autoClose, timeout });
             }
         });

@@ -7,6 +7,19 @@ export enum AuthType {
     KeyBased = "keybased",
 }
 
+/**
+ * The auth types a universal connector can offer, as keyed in
+ * {@link Application.auth_type_options}. A native application is only ever an
+ * {@link AuthType}; a connector names its own and may support several, so the caller has
+ * to say which one it is submitting.
+ */
+export enum ConnectorAuthType {
+    OAuth2 = "oauth2",
+    ApiKey = "api_key",
+    BasicAuth = "basic_auth",
+    BearerToken = "bearer_token",
+}
+
 export enum AuthStatus {
     Active = "active",
     Expired = "expired",
@@ -20,9 +33,18 @@ export enum GrantType {
 }
 
 /** An application in Refold. */
+/**
+ * What kind of connector an application is. Universal connectors are configured in
+ * Refold rather than shipped as native integrations, and authenticate through their
+ * own endpoints — {@link Refold.connect} and {@link Refold.disconnect} route on this.
+ */
+export type ConnectorKind = "native" | "custom" | "universal_connector";
+
 export interface Application {
     /** Application ID */
     app_id: string;
+    /** Whether this is a native app, a custom app, or a universal connector. */
+    kind?: ConnectorKind;
     /**The application name. */
     name: string;
     /**The application description. */
@@ -48,8 +70,14 @@ export interface Application {
     grant_type?: GrantType;
     /** The supported auth types for the application, and the fields required from the user to connect the application. */
     auth_type_options?: {
-        /** The fields required from the user to connect the application. */
-        [key in AuthType]: InputField[];
+        /**
+         * The fields required from the user to connect the application, keyed by auth
+         * type. Native apps use {@link AuthType} (`oauth2` / `keybased`); universal
+         * connectors key by their own {@link ConnectorAuthType} (`api_key`,
+         * `basic_auth`, `bearer_token`, `oauth2`) and may offer several for the user to
+         * choose from. Keys are optional because which ones appear depends on the kind.
+         */
+        [authType in AuthType | ConnectorAuthType]?: InputField[];
     };
     /** The list of connected accounts for this application */
     connected_accounts?: {
@@ -130,11 +158,23 @@ export interface KeyBasedParams {
     slug: string;
     /** The key value pairs of auth data. */
     payload?: Record<string, string>;
+    /**
+     * The auth type being submitted, as named by the application's
+     * {@link Application.auth_type_options}. Universal connectors distinguish
+     * `api_key` / `basic_auth` / `bearer_token`, so a connector offering more than one
+     * cannot be resolved from the credentials alone.
+     */
+    authType?: AuthType | ConnectorAuthType;
 }
 
 export interface ConnectParams extends OAuthParams {
-    /** The authentication type to use. If not provided, it defaults to `keybased` if payload is provided, otherwise `oauth2`. */
-    type?: AuthType;
+    /**
+     * The authentication type to use — an {@link AuthType} for native applications, or
+     * one of a universal connector's own types (a key of
+     * {@link Application.auth_type_options}). If not provided, it defaults to `keybased`
+     * when a payload is given, otherwise `oauth2`.
+     */
+    type?: AuthType | ConnectorAuthType;
 }
 
 /** The payload object for config. */
@@ -688,7 +728,13 @@ class Refold {
     private async keybased({
         slug,
         payload,
+        authType,
     }: KeyBasedParams): Promise<boolean> {
+        // A connector offering several key-based types needs to be told which one; the generic
+        // `keybased` is not one of them, so it is not forwarded and an application's body stays
+        // exactly the credentials it always was. A connector with a single key-based type has
+        // it inferred server-side.
+        const connectorAuthType = authType && authType !== AuthType.KeyBased ? authType : undefined;
         const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
             method: "POST",
             headers: {
@@ -697,6 +743,7 @@ class Refold {
             },
             body: JSON.stringify({
                 ...payload,
+                ...(connectorAuthType ? { auth_type: connectorAuthType } : {}),
             }),
         });
 
@@ -733,13 +780,13 @@ class Refold {
             case AuthType.OAuth2:
                 return this.oauth({ slug, payload, grantType, autoClose, timeout });
             case AuthType.KeyBased:
-                return this.keybased({ slug, payload });
+                return this.keybased({ slug, payload, authType: type });
             default:
                 // client-credentials (M2M) is OAuth2 but carries a payload, so it
                 // must not be mistaken for a key-based connect.
                 if (grantType === GrantType.ClientCredentials)
                     return this.oauth({ slug, payload, grantType, autoClose, timeout });
-                if (payload) return this.keybased({ slug, payload });
+                if (payload) return this.keybased({ slug, payload, authType: type });
                 return this.oauth({ slug, grantType, autoClose, timeout });
         }
     }
