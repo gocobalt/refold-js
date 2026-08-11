@@ -195,6 +195,17 @@ export interface WorkflowPayload {
     /** A map of workflow field names and their values. */
     fields: Record<string, string | number | boolean>;
 }
+/** The payload object for toggling a config workflow. */
+export interface ToggleConfigWorkflowPayload {
+    /** The application slug. */
+    slug: string;
+    /** Unique ID for the config. */
+    config_id: string;
+    /** Unique ID for the workflow. */
+    workflow_id: string;
+    /** Whether the workflow should be enabled. */
+    enabled: boolean;
+}
 export interface RefoldOptions {
     /** The base URL of the Refold API. You don't need to set this. */
     baseUrl?: string;
@@ -537,13 +548,10 @@ declare class Refold {
     deleteConfig(slug: string, configId?: string): Promise<unknown>;
     /**
      * Enables or disables a single workflow within a config, without re-installing the config.
-     * @param {String} slug The application slug.
-     * @param {String} configId The unique ID of the config.
-     * @param {String} workflowId The unique ID of the workflow.
-     * @param {Boolean} enabled Whether the workflow should be enabled.
+     * @param {ToggleConfigWorkflowPayload} payload The toggle payload.
      * @returns {Promise<ConfigWorkflow[]>} The updated list of workflows in the config.
      */
-    toggleConfigWorkflow(slug: string, configId: string, workflowId: string, enabled: boolean): Promise<ConfigWorkflow[]>;
+    toggleConfigWorkflow(payload: ToggleConfigWorkflowPayload): Promise<ConfigWorkflow[]>;
     /**
      * Returns the specified field of the config.
      * @param {String} slug The application slug.

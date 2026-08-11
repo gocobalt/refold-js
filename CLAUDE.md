@@ -125,6 +125,7 @@ All requests include `Authorization: Bearer ${token}`:
 
 ## Version History
 
+- **v10.4:** Added `toggleConfigWorkflow()` to enable/disable a single workflow in a config without re-installing it. Takes an options object (`ToggleConfigWorkflowPayload`), matching `config`/`updateConfig` style.
 - **v10.2:** OAuth `client_credentials` (M2M) grant on `connect()` — `grantType` selects transport: M2M POSTs fields in the body and returns `{ connected }` with no popup; redirect grants keep the GET popup flow. Added exported `GrantType` enum and `Application.grant_type`.
 - **v10.x:** Rebranded to `@refoldai/refold-js`; added `autoClose` and `timeout` options to `connect()`, OAuth polling hardening (popup-block fail-fast, failure tolerance, post-close grace)
 - **v9.x:** Added `getWorkflowPayload()`, `executeWorkflow()`, multi-auth support
