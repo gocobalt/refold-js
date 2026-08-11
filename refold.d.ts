@@ -536,6 +536,15 @@ declare class Refold {
      */
     deleteConfig(slug: string, configId?: string): Promise<unknown>;
     /**
+     * Enables or disables a single workflow within a config, without re-installing the config.
+     * @param {String} slug The application slug.
+     * @param {String} configId The unique ID of the config.
+     * @param {String} workflowId The unique ID of the workflow.
+     * @param {Boolean} enabled Whether the workflow should be enabled.
+     * @returns {Promise<ConfigWorkflow[]>} The updated list of workflows in the config.
+     */
+    toggleConfigWorkflow(slug: string, configId: string, workflowId: string, enabled: boolean): Promise<ConfigWorkflow[]>;
+    /**
      * Returns the specified field of the config.
      * @param {String} slug The application slug.
      * @param {String} fieldId The unique ID of the field.
