@@ -62,6 +62,7 @@ const refold = new Refold({ token?: string, baseUrl?: string })
 - `updateConfigField(slug, fieldId, value, workflowId?): Promise<Config>` — Update field
 - `deleteConfigField(slug, fieldId, workflowId?): Promise<unknown>` — Delete field
 - `getFieldOptions(lhs, slug, fieldId, workflowId?): Promise<RuleOptions>` — Rule engine options
+- `toggleConfigWorkflow(payload: ToggleConfigWorkflowPayload): Promise<ConfigWorkflow[]>` — Enable/disable a single workflow in a config without re-installing it
 
 **Workflows:**
 - `getWorkflows(params?): Promise<PaginatedResponse<PublicWorkflow>>` — List workflows
@@ -84,6 +85,7 @@ enum GrantType { AuthorizationCode = "authorization_code", AuthorizationCodePKCE
 
 **Application** — app_id, name, slug, icon, tags, `grant_type` (`GrantType`, absent ⇒ authorization_code), auth_type_options, connected_accounts (with status)
 **Config** — slug, config_id, fields (ConfigField[]), workflows (ConfigWorkflow[]), field_errors
+**ToggleConfigWorkflowPayload** — slug, config_id, workflow_id, enabled
 **Execution** — status (COMPLETED/RUNNING/ERRORED/STOPPED/STOPPING/TIMED_OUT), nodes with node_status, completion_percentage
 
 ### OAuth Flow
@@ -108,7 +110,7 @@ All 4xx/5xx HTTP responses throw the parsed JSON error response. No try/catch in
 All requests include `Authorization: Bearer ${token}`:
 - Auth service: `/api/v3/org/basics`, `/api/v2/public/linked-account`
 - Apps: `/api/v2/f-sdk/application`, `/api/v1/{slug}/integrate` (**GET** for redirect grants → `{ auth_url }`; **POST** with a JSON body for `client_credentials`/M2M → `{ connected }`), `/api/v2/app/{slug}/save`
-- Config: `/api/v2/f-sdk/config`, `/api/v2/f-sdk/slug/{slug}/config/{configId}`, `/api/v2/public/config/field/{fieldId}`
+- Config: `/api/v2/f-sdk/config`, `/api/v2/f-sdk/slug/{slug}/config/{configId}`, `/api/v2/public/config/field/{fieldId}`, `/api/v2/public/slug/{slug}/config/{configId}/workflows/{workflowId}` (**PATCH** toggle workflow enabled state)
 - Workflows: `/api/v2/public/workflow`, `/api/v2/public/workflow/{id}/execute`
 - Executions: `/api/v2/public/execution`
 
