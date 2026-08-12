@@ -468,6 +468,30 @@ class Refold {
         });
     }
     /**
+     * Enables or disables a single workflow within a config, without re-installing the config.
+     * @param {ToggleConfigWorkflowPayload} payload The toggle payload.
+     * @returns {Promise<ConfigWorkflow[]>} The updated list of workflows in the config.
+     */
+    toggleConfigWorkflow(payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { slug, config_id, workflow_id, enabled } = payload;
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/config/${config_id}/workflows/${workflow_id}`, {
+                method: "PATCH",
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify({ enabled }),
+            });
+            if (res.status >= 400 && res.status < 600) {
+                const error = yield res.json();
+                throw error;
+            }
+            const data = yield res.json();
+            return data.workflows;
+        });
+    }
+    /**
      * Returns the specified field of the config.
      * @param {String} slug The application slug.
      * @param {String} fieldId The unique ID of the field.
