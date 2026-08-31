@@ -164,35 +164,32 @@ class Refold {
     /**
      * Starts the connect flow for the specified application against `/integrate`.
      *
-     * Transport is chosen from the application's grant: {@link GrantType.ClientCredentials}
-     * (M2M) submits the fields in the request body so a private key or client
-     * secret never rides in a URL, and the server mints the token and returns
-     * `connected`. Redirect grants (authorization_code / PKCE) carry only
-     * non-secret pre-requisite fields, sent as query parameters, and the server
-     * returns an `auth_url` to open.
+     * Always a POST with the fields in the JSON body. The server decides what the
+     * connect needs — it resolves the application's grant itself — and answers
+     * either `auth_url` for a redirect grant or `connected` for a machine-to-machine
+     * one. The caller cannot know which is wanted before asking: an application's
+     * grant is not on the app object for every kind of application, so choosing the
+     * transport client-side left connectors whose only grant is client_credentials
+     * unconnectable — the GET carries no body, so their fields never arrived.
+     *
+     * A body also keeps a private key or client secret out of the URL, where query
+     * strings reach access logs, proxy logs and browser history.
      * @private
      * @param {String} slug The application slug.
      * @param {Object.<string, string>} [params] The key value pairs of auth data.
-     * @param {GrantType} [grant] The application's OAuth grant. Omit for redirect grants.
      * @returns {Promise<{auth_url?: string, connected?: boolean}>} The server response.
      */
-    integrate(slug, params, grant) {
+    integrate(slug, params) {
         return __awaiter(this, void 0, void 0, function* () {
             const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
-            const res = grant === GrantType.ClientCredentials
-                ? yield fetch(url, {
-                    method: "POST",
-                    headers: {
-                        authorization: `Bearer ${this.token}`,
-                        "content-type": "application/json",
-                    },
-                    body: JSON.stringify(params !== null && params !== void 0 ? params : {}),
-                })
-                : yield fetch(`${url}?${new URLSearchParams(params).toString()}`, {
-                    headers: {
-                        authorization: `Bearer ${this.token}`,
-                    },
-                });
+            const res = yield fetch(url, {
+                method: "POST",
+                headers: {
+                    authorization: `Bearer ${this.token}`,
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify(params !== null && params !== void 0 ? params : {}),
+            });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
                 throw error;
@@ -211,8 +208,8 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     oauth(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
-            const data = yield this.integrate(slug, payload, grantType);
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, }) {
+            const data = yield this.integrate(slug, payload);
             // No auth_url ⇒ the server completed the connection without a redirect
             // (client-credentials / M2M); report the outcome it gives us. A response
             // with neither an auth_url nor a connection result is unexpected — surface
