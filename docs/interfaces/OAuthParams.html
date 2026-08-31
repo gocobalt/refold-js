@@ -18,7 +18,7 @@
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="ConnectParams.html" class="tsd-signature-type tsd-kind-interface">ConnectParams</a></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/a5e0e8a23d3d5cfdd25e02792c0e0870bc0d4d1f/refold.ts#L138">refold.ts:138</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/6e45cf51dd66cd74b1d2cbcb2959382dd93ea7e0/refold.ts#L138">refold.ts:138</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -41,38 +41,40 @@
 <div class="tsd-comment tsd-typography"><p>Whether to close the authentication window automatically.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/a5e0e8a23d3d5cfdd25e02792c0e0870bc0d4d1f/refold.ts#L151">refold.ts:151</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/6e45cf51dd66cd74b1d2cbcb2959382dd93ea7e0/refold.ts#L153">refold.ts:153</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="granttype"><code class="tsd-tag">Optional</code><span>grant<wbr/>Type</span><a href="#granttype" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">grantType</span><span class="tsd-signature-symbol">?:</span> <a href="../enums/GrantType.html" class="tsd-signature-type tsd-kind-enum">GrantType</a></div>
-<div class="tsd-comment tsd-typography"><p>The application's OAuth grant (from the app object). Pass
-<a href="../enums/GrantType.html#clientcredentials" class="tsd-kind-enum-member">GrantType.ClientCredentials</a> for machine-to-machine connectors so
-their fields are submitted to the server and no browser window is opened.
-Omit for redirect grants (authorization_code / PKCE), the default.</p>
+<div class="tsd-comment tsd-typography"><p>The application's OAuth grant (from the app object). It no longer selects the
+transport — every connect is a POST and the server decides — but it still
+routes: <a href="../classes/Refold.html#connect" class="tsd-kind-method">Refold.connect</a> sends a payload-bearing connect down the OAuth
+path rather than the key-based one when this names
+<a href="../enums/GrantType.html#clientcredentials" class="tsd-kind-enum-member">GrantType.ClientCredentials</a> and no <code>type</code> was given. Pass <code>type</code>
+explicitly and it is not needed.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/a5e0e8a23d3d5cfdd25e02792c0e0870bc0d4d1f/refold.ts#L149">refold.ts:149</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/6e45cf51dd66cd74b1d2cbcb2959382dd93ea7e0/refold.ts#L151">refold.ts:151</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="payload"><code class="tsd-tag">Optional</code><span>payload</span><a href="#payload" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">payload</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div>
 <div class="tsd-comment tsd-typography"><p>The key value pairs of auth data.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/a5e0e8a23d3d5cfdd25e02792c0e0870bc0d4d1f/refold.ts#L142">refold.ts:142</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/6e45cf51dd66cd74b1d2cbcb2959382dd93ea7e0/refold.ts#L142">refold.ts:142</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="slug"><span>slug</span><a href="#slug" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The application slug.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/a5e0e8a23d3d5cfdd25e02792c0e0870bc0d4d1f/refold.ts#L140">refold.ts:140</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/6e45cf51dd66cd74b1d2cbcb2959382dd93ea7e0/refold.ts#L140">refold.ts:140</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="timeout"><code class="tsd-tag">Optional</code><span>timeout</span><a href="#timeout" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">timeout</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
 <div class="tsd-comment tsd-typography"><p>Maximum time in milliseconds to wait for authentication before giving up. Set to <code>0</code> to wait indefinitely. Defaults to 5 minutes.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/a5e0e8a23d3d5cfdd25e02792c0e0870bc0d4d1f/refold.ts#L153">refold.ts:153</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/6e45cf51dd66cd74b1d2cbcb2959382dd93ea7e0/refold.ts#L155">refold.ts:155</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

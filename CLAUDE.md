@@ -47,10 +47,10 @@ const refold = new Refold({ token?: string, baseUrl?: string })
 - `getApps(): Promise<Application[]>` — Alias for getApp()
 
 **Connection:**
-- `connect({ slug, type?, payload?, grantType?, autoClose?, timeout? }): Promise<boolean>` — Connect app (OAuth2 redirect popup, OAuth2 client-credentials/M2M, or key-based POST). `grantType` (an exported `GrantType`) selects the OAuth transport: `client_credentials` submits the fields to the server and returns without opening a window; omit (or a redirect grant) uses the popup flow. Passing `grantType: GrantType.ClientCredentials` routes to the OAuth path even when a payload is present. `autoClose` (default `true`) closes the OAuth popup on success; `timeout` (default 5 minutes, `0` to wait indefinitely) caps the OAuth popup wait. `autoClose`/`timeout` apply only to the redirect popup flow. Param type: exported `ConnectParams` (extends `OAuthParams`).
+- `connect({ slug, type?, payload?, grantType?, autoClose?, timeout? }): Promise<boolean>` — Connect app (OAuth2 redirect popup, OAuth2 client-credentials/M2M, or key-based POST). `grantType` (an exported `GrantType`) no longer selects the transport — every connect POSTs and the server decides — but passing `grantType: GrantType.ClientCredentials` still routes to the OAuth path when a payload is present and no `type` was given. `autoClose` (default `true`) closes the OAuth popup on success; `timeout` (default 5 minutes, `0` to wait indefinitely) caps the OAuth popup wait. `autoClose`/`timeout` apply only to the redirect popup flow. Param type: exported `ConnectParams` (extends `OAuthParams`).
 - `disconnect(slug, type?, kind?): Promise<unknown>` — Disconnect app
 
-**Universal connectors:** connectors (`Application.kind === "universal_connector"`) authenticate through their own endpoints under `/api/v1/auth-service/f-sdk/universal-connector/:slug` — `integrate` (OAuth), `save-credentials` (key-based), `revoke` (disconnect) — instead of the native/custom app routes. `connect()`/`disconnect()` route on `kind`: pass it (an exported `ConnectorKind`, from the app object) to skip the lookup, or omit it and the SDK resolves the kind via `getApp(slug)`. A failed lookup falls back to the native path so an unrelated outage can't misroute a native connect.
+**Universal connectors:** connectors (`Application.kind === "universal_connector"`) connect through the **same** routes as native and custom apps — `/api/v1/{slug}/integrate`, `/api/v2/app/{slug}/save`, `DELETE /api/v1/linked-acc/integration/{slug}` — because the server resolves what kind a slug is. So `connect()`/`disconnect()` take no `kind` argument and do no pre-connect lookup; `Application.kind` is informational, for the caller's own branching. (An earlier design gave connectors their own `/api/v1/auth-service/f-sdk/universal-connector/:slug` endpoints and routed on `kind`; that was reverted in `3a2a59e` so callers no longer have to work out the kind first.)
 
 **Configuration:**
 - `config(payload): Promise<Config>` — Create/get config
@@ -89,17 +89,17 @@ enum GrantType { AuthorizationCode = "authorization_code", AuthorizationCodePKCE
 **Execution** — status (COMPLETED/RUNNING/ERRORED/STOPPED/STOPPING/TIMED_OUT), nodes with node_status, completion_percentage
 
 ### OAuth Flow
-The `/integrate` call is grant-driven, keyed off the caller-supplied `grantType`; there is no pre-connect `getApp` lookup (a second round-trip before `window.open` tripped strict popup blockers).
+The `/integrate` call is **always a POST** with the fields in the JSON body; the server resolves the application's grant and answers with whichever shape that grant needs. There is no pre-connect `getApp` lookup (a second round-trip before `window.open` tripped strict popup blockers).
 
 **Redirect grants (authorization_code / PKCE — the default):**
-- `GET /api/v1/{slug}/integrate?<params>` returns `{ auth_url }`. Fields ride in the query string (non-secret pre-requisite fields only).
+- `POST /api/v1/{slug}/integrate` returns `{ auth_url }`.
 - Opens popup via `window.open(auth_url)`; if the popup is blocked, rejects immediately with an `Error` carrying `code: "POPUP_BLOCKED"`
 - Polls `/api/v2/f-sdk/application/{slug}` every 3 seconds (one in-flight check at a time; up to 3 consecutive polling failures are tolerated before rejecting with the first error of the streak)
 - Resolves `true` when `connected_accounts` shows an active OAuth connection (closes the popup unless `autoClose: false`)
 - Resolves `false` after the window closes or the `timeout` elapses (closing the popup on timeout unless `autoClose: false`) — in both cases polling continues for a 6-second grace period first, since the connection may complete moments around the close/cutoff
 
-**Client credentials (M2M — `grantType: GrantType.ClientCredentials`):**
-- `POST /api/v1/{slug}/integrate` with the fields in the JSON **body** (so a private key / client secret never rides in a URL). No window is opened and no polling occurs.
+**Client credentials (M2M):**
+- The same `POST`. No window is opened and no polling occurs.
 - The server mints the token and returns `{ connected: boolean }`; `connect()` resolves that value.
 - A response carrying neither `auth_url` nor a boolean `connected` throws an `Error` tagged `code: "UNEXPECTED_INTEGRATE_RESPONSE"`.
 
@@ -109,7 +109,7 @@ All 4xx/5xx HTTP responses throw the parsed JSON error response. No try/catch in
 ### Backend API Endpoints Used
 All requests include `Authorization: Bearer ${token}`:
 - Auth service: `/api/v3/org/basics`, `/api/v2/public/linked-account`
-- Apps: `/api/v2/f-sdk/application`, `/api/v1/{slug}/integrate` (**GET** for redirect grants → `{ auth_url }`; **POST** with a JSON body for `client_credentials`/M2M → `{ connected }`), `/api/v2/app/{slug}/save`
+- Apps: `/api/v2/f-sdk/application`, `/api/v1/{slug}/integrate` (**POST** with a JSON body; answers `{ auth_url }` for a redirect grant or `{ connected }` for M2M), `/api/v2/app/{slug}/save`
 - Config: `/api/v2/f-sdk/config`, `/api/v2/f-sdk/slug/{slug}/config/{configId}`, `/api/v2/public/config/field/{fieldId}`, `/api/v2/public/slug/{slug}/config/{configId}/workflows/{workflowId}` (**PATCH** toggle workflow enabled state)
 - Workflows: `/api/v2/public/workflow`, `/api/v2/public/workflow/{id}/execute`
 - Executions: `/api/v2/public/execution`
@@ -127,6 +127,7 @@ All requests include `Authorization: Bearer ${token}`:
 
 ## Version History
 
+- **v10.5:** `/integrate` is always a `POST` with the fields in the JSON body, instead of the transport being chosen from `grantType`. The caller cannot know which shape a connect needs before asking — an application's grant is not on the app object for every kind of application — and the old `GET` carried no body, so a connector whose only grant is `client_credentials` could not be connected at all. The server already accepted `POST` on both grants and answers `auth_url` or `connected` either way, which `connect()` already dispatched on. `grantType` is now routing-only.
 - **v10.4:** Added `toggleConfigWorkflow()` to enable/disable a single workflow in a config without re-installing it. Takes an options object (`ToggleConfigWorkflowPayload`), matching `config`/`updateConfig` style.
 - **v10.2:** OAuth `client_credentials` (M2M) grant on `connect()` — `grantType` selects transport: M2M POSTs fields in the body and returns `{ connected }` with no popup; redirect grants keep the GET popup flow. Added exported `GrantType` enum and `Application.grant_type`.
 - **v10.x:** Rebranded to `@refoldai/refold-js`; added `autoClose` and `timeout` options to `connect()`, OAuth polling hardening (popup-block fail-fast, failure tolerance, post-close grace)
