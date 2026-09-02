@@ -427,6 +427,7 @@ declare class Refold {
     private baseUrl;
     token: string;
     private code;
+    private claim?;
     private exchange?;
     /**
      * Refold Frontend SDK
@@ -443,6 +444,13 @@ declare class Refold {
      * @private
      */
     private bearer;
+    /**
+     * The one in-flight exchange for this instance. A code is spendable once, so concurrent calls
+     * share it rather than race. A failure is not cached — a spent code fails again anyway, while
+     * caching the rejection would let one network blip brick the instance for good.
+     * @private
+     */
+    private startExchange;
     /**
      * Claims a connect code, which spends it. Unauthenticated by construction — possession of the
      * code is the credential, and the page holding it has nothing else to present.
