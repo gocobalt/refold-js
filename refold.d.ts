@@ -211,6 +211,12 @@ export interface RefoldOptions {
     baseUrl?: string;
     /** The session token. */
     token?: string;
+    /**
+     * The single-use code from a connect URL, traded for a session token on the first request.
+     * Prefer this over `token`: a code that reaches the wrong person is already spent, whereas a
+     * token stays usable until it expires. Ignored if `token` is also given.
+     */
+    code?: string;
 }
 export interface RuleOptions {
     rule_column: {
@@ -420,13 +426,29 @@ export interface Execution {
 declare class Refold {
     private baseUrl;
     token: string;
+    private code;
+    private exchange?;
     /**
      * Refold Frontend SDK
      * @param {Object} options The options to configure the Refold SDK.
+     * @param {String} [options.code] The single-use code from a connect URL.
      * @param {String} [options.token] The session token.
      * @param {String} [options.baseUrl=https://app.refold.ai] The base URL of the Refold API.
      */
     constructor(options?: RefoldOptions);
+    /**
+     * The `Authorization` header every request carries. A code is traded for its session token on
+     * first use and the token is then held in memory only, so it never reaches the URL, storage or
+     * anywhere else the page can leak it.
+     * @private
+     */
+    private bearer;
+    /**
+     * Claims a connect code, which spends it. Unauthenticated by construction — possession of the
+     * code is the credential, and the page holding it has nothing else to present.
+     * @private
+     */
+    private exchangeCode;
     /**
      * Returns the org & customer details for the associated token.
      * @private

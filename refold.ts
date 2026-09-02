@@ -234,6 +234,12 @@ export interface RefoldOptions {
     baseUrl?: string;
     /** The session token. */
     token?: string;
+    /**
+     * The single-use code from a connect URL, traded for a session token on the first request.
+     * Prefer this over `token`: a code that reaches the wrong person is already spent, whereas a
+     * token stays usable until it expires. Ignored if `token` is also given.
+     */
+    code?: string;
 }
 
 export interface RuleOptions {
@@ -470,10 +476,13 @@ const DEFAULT_CONNECT_TIMEOUT = 300e3;
 class Refold {
     private baseUrl: string;
     public token: string;
+    private code: string;
+    private exchange?: Promise<string>;
 
     /**
      * Refold Frontend SDK
      * @param {Object} options The options to configure the Refold SDK.
+     * @param {String} [options.code] The single-use code from a connect URL.
      * @param {String} [options.token] The session token.
      * @param {String} [options.baseUrl=https://app.refold.ai] The base URL of the Refold API.
      */
@@ -484,6 +493,50 @@ class Refold {
                 :   "https://" + options.baseUrl
             :   "https://app.refold.ai";
         this.token = options.token || "";
+        this.code = options.code || "";
+    }
+
+    /**
+     * The `Authorization` header every request carries. A code is traded for its session token on
+     * first use and the token is then held in memory only, so it never reaches the URL, storage or
+     * anywhere else the page can leak it.
+     * @private
+     */
+    private async bearer(): Promise<string> {
+        if (!this.token && this.code) {
+            // A code is spendable once, so concurrent calls share one exchange rather than race.
+            // A failed exchange is not cached: a spent code fails again anyway, and a network blip
+            // would otherwise brick the instance for good.
+            this.exchange ??= this.exchangeCode(this.code).catch(error => {
+                this.exchange = undefined;
+                throw error;
+            });
+            this.token = await this.exchange;
+        }
+        return `Bearer ${this.token}`;
+    }
+
+    /**
+     * Claims a connect code, which spends it. Unauthenticated by construction — possession of the
+     * code is the credential, and the page holding it has nothing else to present.
+     * @private
+     */
+    private async exchangeCode(code: string): Promise<string> {
+        const res = await fetch(`${this.baseUrl}/api/v2/public/connect-code/exchange`, {
+            method: "POST",
+            headers: {
+                "content-type": "application/json",
+            },
+            body: JSON.stringify({ code }),
+        });
+
+        if (res.status >= 400 && res.status < 600) {
+            const error = await res.json();
+            throw error;
+        }
+
+        const data = await res.json();
+        return data.token;
     }
 
     /**
@@ -494,7 +547,7 @@ class Refold {
     public async getAccountDetails(): Promise<unknown> {
         const res = await fetch(`${this.baseUrl}/api/v3/org/basics`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -516,7 +569,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/linked-account`, {
             method: "PUT",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
             },
             body: JSON.stringify({
@@ -555,7 +608,7 @@ class Refold {
     public async getApp(slug?: string): Promise<Application | Application[]> {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/application${slug ? `/${slug}` : ""}`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -575,7 +628,7 @@ class Refold {
     public async getApps(): Promise<Application[]> {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/application`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -613,14 +666,14 @@ class Refold {
             ? await fetch(url, {
                 method: "POST",
                 headers: {
-                    authorization: `Bearer ${this.token}`,
+                    authorization: await this.bearer(),
                     "content-type": "application/json",
                 },
                 body: JSON.stringify(params ?? {}),
             })
             : await fetch(`${url}?${new URLSearchParams(params).toString()}`, {
                 headers: {
-                    authorization: `Bearer ${this.token}`,
+                    authorization: await this.bearer(),
                 },
             });
 
@@ -750,7 +803,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
             method: "POST",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
             },
             body: JSON.stringify({
@@ -813,7 +866,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
             method: "DELETE",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -834,7 +887,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/config`, {
             method: "POST",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
             },
             body: JSON.stringify({
@@ -859,7 +912,7 @@ class Refold {
     async getConfigs(slug: string): Promise<{ config_id: string; }[]> {
         const res = await fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/configs`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -881,7 +934,7 @@ class Refold {
     async getConfig(slug: string, configId: string, excludeOptions?: boolean): Promise<Config> {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 ...(excludeOptions ? { disable_field_options: "true" } : {}),
             },
         });
@@ -903,7 +956,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/config`, {
             method: "PUT",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
             },
             body: JSON.stringify(payload),
@@ -927,7 +980,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}`, {
             method: "DELETE",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -949,7 +1002,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/config/${config_id}/workflows/${workflow_id}`, {
             method: "PATCH",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
             },
             body: JSON.stringify({ enabled }),
@@ -976,7 +1029,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
             method: "POST",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
                 slug,
             },
@@ -1003,7 +1056,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
             method: "PUT",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
                 slug,
             },
@@ -1029,7 +1082,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
             method: "DELETE",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 slug,
             },
         });
@@ -1054,7 +1107,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/config/rule-engine/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
             method: "POST",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
                 slug,
             },
@@ -1092,7 +1145,7 @@ class Refold {
 
         const res = await fetch(`${this.baseUrl}/api/v2/public/workflow?${query}`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -1117,7 +1170,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/workflow`, {
             method: "POST",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
             },
             body: JSON.stringify({
@@ -1145,7 +1198,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/workflow/${workflowId}`, {
             method: "DELETE",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -1165,7 +1218,7 @@ class Refold {
     async getWorkflowPayload(workflowId: string): Promise<WorkflowPayloadResponse> {
         const res = await fetch(`${this.baseUrl}/api/v2/public/workflow/request-structure/${workflowId}`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -1189,7 +1242,7 @@ class Refold {
         const res = await fetch(`${this.baseUrl}/api/v2/public/workflow/${options?.worklfow}/execute`, {
             method: "POST",
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
                 "content-type": "application/json",
                 slug: options?.slug || "",
                 sync_execution: options?.sync_execution ? "true" : "false",
@@ -1228,7 +1281,7 @@ class Refold {
 
         const res = await fetch(`${this.baseUrl}/api/v2/public/execution?${query}`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 
@@ -1248,7 +1301,7 @@ class Refold {
     async getExecution(executionId: string): Promise<Execution> {
         const res = await fetch(`${this.baseUrl}/api/v2/public/execution/${executionId}`, {
             headers: {
-                authorization: `Bearer ${this.token}`,
+                authorization: await this.bearer(),
             },
         });
 

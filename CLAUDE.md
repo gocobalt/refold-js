@@ -9,12 +9,13 @@ Refold JS SDK (`@refoldai/refold-js`) — a zero-dependency TypeScript frontend 
 ## Commands
 
 ```bash
+npm test               # Build, then run refold.test.mjs on node --test
 npm run build          # Compile TypeScript (tsc) → refold.js + refold.d.ts
 npm run docs           # Generate TypeDoc HTML documentation
 npm run docs:llms      # Generate LLM-optimized markdown docs (docs/llms.txt)
 ```
 
-No test runner is configured. No runtime dependencies.
+`npm test` builds and runs `refold.test.mjs` on Node's built-in runner (`node --test`) — no test framework, keeping the package dependency-free. No runtime dependencies.
 
 ## Build Output
 
@@ -30,15 +31,16 @@ Published to npm (`@refoldai/refold-js`) and served via jsDelivr CDN.
 The entire SDK is a single `Refold` class using native `fetch` API. No external dependencies.
 
 ### Authentication
-- Bearer token auth via `Authorization` header on all requests
+- Bearer token auth via `Authorization` header on all requests, assembled by the private `bearer()` helper that every call site routes through
 - Token set via constructor option or `refold.token = "..."` after initialization
+- Alternatively a single-use `code` (from a `/connect/<code>` URL) is exchanged for a session token on the first request via `POST /api/v2/public/connect-code/exchange`. The exchange is unauthenticated — possession of the code is the credential — is deduplicated so concurrent calls spend the code once, and is not cached on failure so a network blip stays retryable. An explicit `token` wins over a `code`.
 - Default base URL: `https://app.refold.ai` (configurable via `baseUrl` option)
 
 ### Public API
 
 **Constructor:**
 ```typescript
-const refold = new Refold({ token?: string, baseUrl?: string })
+const refold = new Refold({ code?: string, token?: string, baseUrl?: string })
 ```
 
 **Application Management:**
@@ -108,7 +110,7 @@ All 4xx/5xx HTTP responses throw the parsed JSON error response. No try/catch in
 
 ### Backend API Endpoints Used
 All requests include `Authorization: Bearer ${token}`:
-- Auth service: `/api/v3/org/basics`, `/api/v2/public/linked-account`
+- Auth service: `/api/v3/org/basics`, `/api/v2/public/linked-account`, `/api/v2/public/connect-code/exchange` (**POST**, unauthenticated, trades a single-use connect code for a session token)
 - Apps: `/api/v2/f-sdk/application`, `/api/v1/{slug}/integrate` (**GET** for redirect grants → `{ auth_url }`; **POST** with a JSON body for `client_credentials`/M2M → `{ connected }`), `/api/v2/app/{slug}/save`
 - Config: `/api/v2/f-sdk/config`, `/api/v2/f-sdk/slug/{slug}/config/{configId}`, `/api/v2/public/config/field/{fieldId}`, `/api/v2/public/slug/{slug}/config/{configId}/workflows/{workflowId}` (**PATCH** toggle workflow enabled state)
 - Workflows: `/api/v2/public/workflow`, `/api/v2/public/workflow/{id}/execute`
@@ -127,6 +129,7 @@ All requests include `Authorization: Bearer ${token}`:
 
 ## Version History
 
+- **v10.5:** `code` constructor option — the single-use code from a connect URL, exchanged for a session token on the first request and held in memory only, so no session token rides in the URL. `token` still accepted for the migration window.
 - **v10.4:** Added `toggleConfigWorkflow()` to enable/disable a single workflow in a config without re-installing it. Takes an options object (`ToggleConfigWorkflowPayload`), matching `config`/`updateConfig` style.
 - **v10.2:** OAuth `client_credentials` (M2M) grant on `connect()` — `grantType` selects transport: M2M POSTs fields in the body and returns `{ connected }` with no popup; redirect grants keep the GET popup flow. Added exported `GrantType` enum and `Application.grant_type`.
 - **v10.x:** Rebranded to `@refoldai/refold-js`; added `autoClose` and `timeout` options to `connect()`, OAuth polling hardening (popup-block fail-fast, failure tolerance, post-close grace)

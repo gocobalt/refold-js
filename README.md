@@ -40,19 +40,30 @@ const { Refold } = require("@refoldai/refold-js");
 
 ### Initialize
 ```js
-// initialize with token
+// initialize with the single-use code from the connect URL (recommended)
 const refold = new Refold({
-    // the token you generate for linked accounts using the Refold backend SDK
-    token: "REFOLD_SESSION_TOKEN",
+    // the code in the /connect/<code> URL you generated on your backend
+    code: "REFOLD_CONNECT_CODE",
     // OPTIONAL: set custom base url for all API requests. only useful if you are hosting Refold on premise.
     baseUrl: "https://refold.example.com/backend",
 });
 
-// Or, initialize without token
+// initialize with a session token
+const refold = new Refold({
+    // the token you generate for linked accounts using the Refold backend SDK
+    token: "REFOLD_SESSION_TOKEN",
+});
+
+// Or, initialize without either
 const refold = new Refold();
 // and you can set the token later.
 refold.token = "REFOLD_SESSION_TOKEN";
 ```
+
+Prefer `code`. It is spent the first time the SDK uses it, so a connect URL that
+reaches the wrong person is already worthless — a session token in the same place
+stays usable until it expires. The SDK trades the code for a token on its first
+request and holds that token in memory only.
 
 # Documentation
 
