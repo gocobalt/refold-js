@@ -1,6 +1,6 @@
 {
   "name": "@refoldai/refold-js",
-  "version": "10.8.0",
+  "version": "10.8.0-beta.1",
   "description": "Refold frontend SDK",
   "main": "./refold.js",
   "typings": "./refold.d.ts",
