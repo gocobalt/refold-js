@@ -14,14 +14,14 @@
 <div class="tsd-comment tsd-typography"><p>Filters for narrowing down the list of workflow executions.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">ExecutionFilters</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#end_date">end_date</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#execution_source">execution_source</a><span class="tsd-signature-symbol">?:</span> <a href="../types/ExecutionSource.html" class="tsd-signature-type tsd-kind-type-alias">ExecutionSource</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#execution_type">execution_type</a><span class="tsd-signature-symbol">?:</span> <a href="../types/ExecutionType.html" class="tsd-signature-type tsd-kind-type-alias">ExecutionType</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#start_date">start_date</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#status">status</a><span class="tsd-signature-symbol">?:</span> <a href="../types/ExecutionStatus.html" class="tsd-signature-type tsd-kind-type-alias">ExecutionStatus</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#workflow_id">workflow_id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#workflow_name">workflow_name</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="142">
+<section class="tsd-panel tsd-hierarchy" data-refl="171">
 <h4>Hierarchy (<a href="../hierarchy.html#ExecutionFilters">View Summary</a>)</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">ExecutionFilters</span>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><a href="GetExecutionsParams.html" class="tsd-signature-type tsd-kind-interface">GetExecutionsParams</a></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L325">refold.ts:325</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L375">refold.ts:375</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -46,49 +46,49 @@
 <div class="tsd-comment tsd-typography"><p>Filter executions that started on or before this ISO 8601 date string.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L335">refold.ts:335</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L385">refold.ts:385</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="execution_source"><code class="tsd-tag">Optional</code><span>execution_<wbr/>source</span><a href="#execution_source" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">execution_source</span><span class="tsd-signature-symbol">?:</span> <a href="../types/ExecutionSource.html" class="tsd-signature-type tsd-kind-type-alias">ExecutionSource</a></div>
 <div class="tsd-comment tsd-typography"><p>Filter by the trigger source that initiated the execution.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L339">refold.ts:339</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L389">refold.ts:389</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="execution_type"><code class="tsd-tag">Optional</code><span>execution_<wbr/>type</span><a href="#execution_type" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">execution_type</span><span class="tsd-signature-symbol">?:</span> <a href="../types/ExecutionType.html" class="tsd-signature-type tsd-kind-type-alias">ExecutionType</a></div>
 <div class="tsd-comment tsd-typography"><p>Filter by how the execution was invoked — synchronously or asynchronously.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L337">refold.ts:337</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L387">refold.ts:387</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="start_date"><code class="tsd-tag">Optional</code><span>start_<wbr/>date</span><a href="#start_date" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">start_date</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter executions that started on or after this ISO 8601 date string.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L333">refold.ts:333</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L383">refold.ts:383</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="status"><code class="tsd-tag">Optional</code><span>status</span><a href="#status" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">status</span><span class="tsd-signature-symbol">?:</span> <a href="../types/ExecutionStatus.html" class="tsd-signature-type tsd-kind-type-alias">ExecutionStatus</a></div>
 <div class="tsd-comment tsd-typography"><p>Filter executions by their current status.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L327">refold.ts:327</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L377">refold.ts:377</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="workflow_id"><code class="tsd-tag">Optional</code><span>workflow_<wbr/>id</span><a href="#workflow_id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">workflow_id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter executions by workflow ID.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L331">refold.ts:331</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L381">refold.ts:381</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="workflow_name"><code class="tsd-tag">Optional</code><span>workflow_<wbr/>name</span><a href="#workflow_name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">workflow_name</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter executions by workflow name (partial match).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L329">refold.ts:329</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L379">refold.ts:379</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

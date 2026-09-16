@@ -41,6 +41,7 @@ var ConnectorAuthType;
     ConnectorAuthType["ApiKey"] = "api_key";
     ConnectorAuthType["BasicAuth"] = "basic_auth";
     ConnectorAuthType["BearerToken"] = "bearer_token";
+    ConnectorAuthType["NoAuth"] = "noauth";
 })(ConnectorAuthType || (exports.ConnectorAuthType = ConnectorAuthType = {}));
 var AuthStatus;
 (function (AuthStatus) {
@@ -62,6 +63,11 @@ const POLL_GRACE = 6e3;
 const MAX_POLL_FAILURES = 3;
 /** The default maximum time, in milliseconds, to wait for authentication. */
 const DEFAULT_CONNECT_TIMEOUT = 180e3;
+/**
+ * The connect body's non-credential keys. They sit alongside the credentials rather than
+ * nested, because the server reads every other key as a credential.
+ */
+const connectTarget = (params) => (Object.assign(Object.assign(Object.assign(Object.assign({}, (params.authProfileId ? { auth_profile_id: params.authProfileId } : {})), (params.connectionId ? { connection_id: params.connectionId } : {})), (params.userDefinedFields ? { user_defined_fields: params.userDefinedFields } : {})), (params.preRequisiteFields ? { pre_requisite_fields: params.preRequisiteFields } : {})));
 class Refold {
     /**
      * Refold Frontend SDK
@@ -209,10 +215,14 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the user authenticated.
      */
     oauth(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, signal, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, signal, authProfileId, connectionId, userDefinedFields, preRequisiteFields, }) {
             if (signal === null || signal === void 0 ? void 0 : signal.aborted)
                 return false;
-            const data = yield this.integrate(slug, payload);
+            // The connections held before this connect, which the success test below reads.
+            // Awaited only after the window opens: a round-trip between the click and
+            // `window.open` is what strict popup blockers reject. Failure falls back.
+            const snapshotRequest = this.getApp(slug).catch(() => undefined);
+            const data = yield this.integrate(slug, Object.assign(Object.assign({}, payload), connectTarget({ authProfileId, connectionId, userDefinedFields, preRequisiteFields })));
             // No auth_url ⇒ the server completed the connection without a redirect
             // (client-credentials / M2M); report the outcome it gives us. A response
             // with neither an auth_url nor a connection result is unexpected — surface
@@ -226,7 +236,29 @@ class Refold {
             if (!connectWindow) {
                 throw Object.assign(new Error("The authentication window could not be opened. It may have been blocked by the browser."), { code: "POPUP_BLOCKED" });
             }
-            const hasActiveOAuthAccount = (app) => { var _a; return Boolean((_a = app === null || app === void 0 ? void 0 : app.connected_accounts) === null || _a === void 0 ? void 0 : _a.filter(a => a.auth_type === AuthType.OAuth2).some(a => a.status === AuthStatus.Active)); };
+            const snapshot = yield snapshotRequest;
+            const liveOAuthAccounts = (app) => {
+                var _a;
+                return ((_a = app === null || app === void 0 ? void 0 : app.connected_accounts) !== null && _a !== void 0 ? _a : []).filter(account => account.auth_type === AuthType.OAuth2 && account.status === AuthStatus.Active);
+            };
+            // `connectedAt` tracks the connection's last write, so re-authenticating an
+            // existing connection changes its stamp without changing its id.
+            const fingerprint = (account) => { var _a; return `${(_a = account.connection_id) !== null && _a !== void 0 ? _a : ""}|${account.connectedAt}`; };
+            const baseline = new Set(liveOAuthAccounts(snapshot).map(fingerprint));
+            /**
+             * Whether the connection this call opened is live. Where an application holds
+             * several, an account connected earlier would otherwise resolve the wait at once
+             * and close the window mid-authentication, so the account has to be one the
+             * snapshot did not already have live.
+             */
+            const isConnected = (app) => {
+                if (!(app === null || app === void 0 ? void 0 : app.has_multi_auth_enabled) || !snapshot) {
+                    return liveOAuthAccounts(app).length > 0;
+                }
+                return liveOAuthAccounts(app)
+                    .filter(account => !connectionId || account.connection_id === connectionId)
+                    .some(account => !baseline.has(fingerprint(account)));
+            };
             return new Promise((resolve, reject) => {
                 const startedAt = Date.now();
                 let inFlight = false;
@@ -280,7 +312,7 @@ class Refold {
                         inFlight = false;
                         consecutiveFailures = 0;
                         firstFailure = undefined;
-                        if (hasActiveOAuthAccount(app)) {
+                        if (isConnected(app)) {
                             // close auth window
                             if (autoClose)
                                 connectWindow.close();
@@ -315,7 +347,7 @@ class Refold {
      * @returns {Promise<Boolean>} Whether the auth data was saved successfully.
      */
     keybased(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, payload, authType, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, payload, authType, authProfileId, connectionId, userDefinedFields, preRequisiteFields, }) {
             // A connector offering several key-based types needs to be told which one; the generic
             // `keybased` is not one of them, so it is not forwarded and an application's body stays
             // exactly the credentials it always was. A connector with a single key-based type has
@@ -327,7 +359,7 @@ class Refold {
                     authorization: `Bearer ${this.token}`,
                     "content-type": "application/json",
                 },
-                body: JSON.stringify(Object.assign(Object.assign({}, payload), (connectorAuthType ? { auth_type: connectorAuthType } : {}))),
+                body: JSON.stringify(Object.assign(Object.assign(Object.assign({}, payload), (connectorAuthType ? { auth_type: connectorAuthType } : {})), connectTarget({ authProfileId, connectionId, userDefinedFields, preRequisiteFields }))),
             });
             if (res.status >= 400 && res.status < 600) {
                 const error = yield res.json();
@@ -347,24 +379,29 @@ class Refold {
      * @param params.autoClose - Whether to close the authentication window automatically once the connection succeeds or the wait times out. If not provided, it defaults to `true`.
      * @param params.timeout - Maximum time in milliseconds to wait for authentication before giving up. Only applicable to the OAuth2 flow. Set to `0` to wait indefinitely. If not provided, it defaults to 3 minutes.
      * @param params.signal - Signal used to give up on an in-progress OAuth2 authentication, resolving the returned promise `false`. Providers that sever the authentication window's handle make an abandoned flow undetectable, so this is the only way to end such a wait before the `timeout`.
+     * @param params.authProfileId - The credential set to connect with, for an application offering several.
+     * @param params.connectionId - An existing connection to re-authenticate rather than opening a new one.
+     * @param params.userDefinedFields - Caller metadata to store against the connection.
+     * @param params.preRequisiteFields - Values the application requires before connecting.
      * @returns A promise that resolves to true if the connection was successful, otherwise false.
      * @throws Throws an error if the authentication type is invalid or the connection fails.
      */
     connect(_a) {
-        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, signal, }) {
+        return __awaiter(this, arguments, void 0, function* ({ slug, type, payload, grantType, autoClose = true, timeout = DEFAULT_CONNECT_TIMEOUT, signal, authProfileId, connectionId, userDefinedFields, preRequisiteFields, }) {
+            const target = { authProfileId, connectionId, userDefinedFields, preRequisiteFields };
             switch (type) {
                 case AuthType.OAuth2:
-                    return this.oauth({ slug, payload, grantType, autoClose, timeout, signal });
+                    return this.oauth(Object.assign({ slug, payload, grantType, autoClose, timeout, signal }, target));
                 case AuthType.KeyBased:
-                    return this.keybased({ slug, payload, authType: type });
+                    return this.keybased(Object.assign({ slug, payload, authType: type }, target));
                 default:
                     // client-credentials (M2M) is OAuth2 but carries a payload, so it
                     // must not be mistaken for a key-based connect.
                     if (grantType === GrantType.ClientCredentials)
-                        return this.oauth({ slug, payload, grantType, autoClose, timeout, signal });
+                        return this.oauth(Object.assign({ slug, payload, grantType, autoClose, timeout, signal }, target));
                     if (payload)
-                        return this.keybased({ slug, payload, authType: type });
-                    return this.oauth({ slug, grantType, autoClose, timeout, signal });
+                        return this.keybased(Object.assign({ slug, payload, authType: type }, target));
+                    return this.oauth(Object.assign({ slug, grantType, autoClose, timeout, signal }, target));
             }
         });
     }
@@ -372,11 +409,13 @@ class Refold {
      * Disconnect the specified application and remove any associated data from Refold.
      * @param {String} slug The application slug.
      * @param {AuthType} [type] The authentication type to use. If not provided, it'll remove all the connected accounts.
+     * @param {ConnectionScoped} [opts] Names the connection to revoke. Required where the
+     *   application holds more than one; the server answers 400 rather than choosing.
      * @returns {Promise<unknown>}
      */
-    disconnect(slug, type) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${type ? `?auth_type=${type}` : ""}`, {
+    disconnect(slug_1, type_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, type, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${this.query({ auth_type: type, connection_id: opts.connectionId })}`, {
                 method: "DELETE",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -412,13 +451,29 @@ class Refold {
         });
     }
     /**
+     * Builds an encoded query string from the params that have a value, `?` included.
+     * Empty when none do.
+     * @private
+     */
+    query(params) {
+        const search = new URLSearchParams();
+        for (const key of Object.keys(params)) {
+            const value = params[key];
+            if (value !== undefined && value !== "")
+                search.append(key, value);
+        }
+        const qs = search.toString();
+        return qs ? `?${qs}` : "";
+    }
+    /**
      * Returns the configs created for the specified application.
      * @param {String} slug The application slug.
-     * @returns {Promise<{ config_id: string; }[]>} The configs created for the specified application.
+     * @param {ConnectionScoped} [opts] Narrows the result to one connection's configs.
+     * @returns {Promise<{ config_id: string; connection_id?: string; }[]>} The configs created for the specified application.
      */
-    getConfigs(slug) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/configs`, {
+    getConfigs(slug_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/configs${this.query({ connection_id: opts.connectionId })}`, {
                 headers: {
                     authorization: `Bearer ${this.token}`,
                 },
@@ -435,11 +490,12 @@ class Refold {
      * @param {String} slug The application slug.
      * @param {String} [configId] The unique ID of the config.
      * @param {Boolean} [excludeOptions] Whether to exclude the options from the fields in the response.
+     * @param {ConnectionScoped} [opts] Names the connection whose config this acts on.
      * @returns {Promise<Config>} The specified config.
      */
-    getConfig(slug, configId, excludeOptions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}`, {
+    getConfig(slug_1, configId_1, excludeOptions_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, configId, excludeOptions, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}${this.query({ connection_id: opts.connectionId })}`, {
                 headers: Object.assign({ authorization: `Bearer ${this.token}` }, (excludeOptions ? { disable_field_options: "true" } : {})),
             });
             if (res.status >= 400 && res.status < 600) {
@@ -475,11 +531,12 @@ class Refold {
      * Delete the specified config.
      * @param {String} slug The application slug.
      * @param {String} [configId] The unique ID of the config.
+     * @param {ConnectionScoped} [opts] Names the connection whose config this acts on.
      * @returns {Promise<unknown>}
      */
-    deleteConfig(slug, configId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}`, {
+    deleteConfig(slug_1, configId_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, configId, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}${this.query({ connection_id: opts.connectionId })}`, {
                 method: "DELETE",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -499,8 +556,8 @@ class Refold {
      */
     toggleConfigWorkflow(payload) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { slug, config_id, workflow_id, enabled } = payload;
-            const res = yield fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/config/${config_id}/workflows/${workflow_id}`, {
+            const { slug, config_id, workflow_id, enabled, connection_id } = payload;
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/config/${config_id}/workflows/${workflow_id}${this.query({ connection_id })}`, {
                 method: "PATCH",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -522,11 +579,12 @@ class Refold {
      * @param {String} fieldId The unique ID of the field.
      * @param {String} [workflowId] The unique ID of the workflow.
      * @param {Record<string, unknown>} [payload] The payload to be sent in the request body.
+     * @param {ConnectionScoped} [opts] Names the connection whose config this acts on.
      * @returns {Promise<Field>} The specified config field.
      */
-    getConfigField(slug, fieldId, workflowId, payload) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
+    getConfigField(slug_1, fieldId_1, workflowId_1, payload_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, fieldId, workflowId, payload, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
                 method: "POST",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -548,11 +606,12 @@ class Refold {
      * @param {String} fieldId The unique ID of the field.
      * @param {String | Number | Boolean | null} value The new value for the field.
      * @param {String} [workflowId] The unique ID of the workflow.
+     * @param {ConnectionScoped} [opts] Names the connection whose config this acts on.
      * @returns {Promise<Field>} The updated config field.
      */
-    updateConfigField(slug, fieldId, value, workflowId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
+    updateConfigField(slug_1, fieldId_1, value_1, workflowId_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, fieldId, value, workflowId, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
                 method: "PUT",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -573,11 +632,12 @@ class Refold {
      * @param {String} slug The application slug.
      * @param {String} fieldId The unique ID of the field.
      * @param {String} [workflowId] The unique ID of the workflow.
+     * @param {ConnectionScoped} [opts] Names the connection whose config this acts on.
      * @returns {Promise<unknown>}
      */
-    deleteConfigField(slug, fieldId, workflowId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
+    deleteConfigField(slug_1, fieldId_1, workflowId_1) {
+        return __awaiter(this, arguments, void 0, function* (slug, fieldId, workflowId, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
                 method: "DELETE",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -597,11 +657,12 @@ class Refold {
      * @param {String} slug The application slug.
      * @param {String} fieldId The unique ID of the field.
      * @param {String} [workflowId] The unique ID of the workflow, if this is a workflow field.
+     * @param {ConnectionScoped} [opts] Names the connection whose config to resolve against.
      * @returns {Promise<RuleOptions>} The specified rule field's options.
      */
-    getFieldOptions(lhs, slug, fieldId, workflowId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/rule-engine/${fieldId}${workflowId ? `?workflow_id=${workflowId}` : ""}`, {
+    getFieldOptions(lhs_1, slug_1, fieldId_1, workflowId_1) {
+        return __awaiter(this, arguments, void 0, function* (lhs, slug, fieldId, workflowId, opts = {}) {
+            const res = yield fetch(`${this.baseUrl}/api/v2/public/config/rule-engine/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
                 method: "POST",
                 headers: {
                     authorization: `Bearer ${this.token}`,
@@ -729,18 +790,15 @@ class Refold {
      * @param {String} options.worklfow The workflow id or alias.
      * @param {String} [options.slug] The application's slug this workflow belongs to. Slug is required if you're using workflow alias.
      * @param {Record<string, any>} [options.payload] The execution payload.
+     * @param {String} [options.config_id] The config to execute against.
+     * @param {String} [options.connection_id] The connection to authenticate the run through.
      * @returns {Promise<unknown>}
      */
     executeWorkflow(options) {
         return __awaiter(this, void 0, void 0, function* () {
             const res = yield fetch(`${this.baseUrl}/api/v2/public/workflow/${options === null || options === void 0 ? void 0 : options.worklfow}/execute`, {
                 method: "POST",
-                headers: {
-                    authorization: `Bearer ${this.token}`,
-                    "content-type": "application/json",
-                    slug: (options === null || options === void 0 ? void 0 : options.slug) || "",
-                    sync_execution: (options === null || options === void 0 ? void 0 : options.sync_execution) ? "true" : "false",
-                },
+                headers: Object.assign(Object.assign({ authorization: `Bearer ${this.token}`, "content-type": "application/json", slug: (options === null || options === void 0 ? void 0 : options.slug) || "", sync_execution: (options === null || options === void 0 ? void 0 : options.sync_execution) ? "true" : "false" }, ((options === null || options === void 0 ? void 0 : options.config_id) ? { config_id: options.config_id } : {})), ((options === null || options === void 0 ? void 0 : options.connection_id) ? { connection_id: options.connection_id } : {})),
                 body: JSON.stringify(options === null || options === void 0 ? void 0 : options.payload),
             });
             if (res.status >= 400 && res.status < 600) {
