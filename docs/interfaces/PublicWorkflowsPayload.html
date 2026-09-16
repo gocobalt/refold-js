@@ -14,7 +14,7 @@
 <div class="tsd-comment tsd-typography"><p>Parameters for filtering and paginating the list of workflows.</p>
 </div></section>
 <div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">PublicWorkflowsPayload</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#end_date">end_date</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#limit">limit</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#name">name</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#page">page</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#published">published</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#slug">slug</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#start_date">start_date</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">[</span><span class="tsd-kind-index-signature">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
-<section class="tsd-panel tsd-hierarchy" data-refl="129">
+<section class="tsd-panel tsd-hierarchy" data-refl="158">
 <h4>Hierarchy</h4>
 <ul class="tsd-hierarchy">
 <li class="tsd-hierarchy-item"><span class="tsd-signature-type">PaginationProps</span>
@@ -28,7 +28,7 @@
 <div class="tsd-comment tsd-typography"><p>Any additional filter keys supported by the API.</p>
 </div></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L297">refold.ts:297</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L347">refold.ts:347</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -53,47 +53,47 @@
 <div class="tsd-comment tsd-typography"><p>Filter workflows created on or before this ISO 8601 date string.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L305">refold.ts:305</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L355">refold.ts:355</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="limit"><code class="tsd-tag">Optional</code><span>limit</span><a href="#limit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">limit</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from PaginationProps.limit</p>
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L314">refold.ts:314</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L364">refold.ts:364</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="name"><code class="tsd-tag">Optional</code><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter workflows by name (partial match).</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L301">refold.ts:301</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L351">refold.ts:351</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited">
 <h3 class="tsd-anchor-link" id="page"><code class="tsd-tag">Optional</code><span>page</span><a href="#page" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">page</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from PaginationProps.page</p>
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L313">refold.ts:313</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L363">refold.ts:363</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="published"><code class="tsd-tag">Optional</code><span>published</span><a href="#published" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">published</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter by workflow published status. <code>true</code> returns only published workflows, <code>false</code> returns only drafts.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L307">refold.ts:307</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L357">refold.ts:357</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="slug"><code class="tsd-tag">Optional</code><span>slug</span><a href="#slug" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">slug</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter workflows by the application slug.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L299">refold.ts:299</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L349">refold.ts:349</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="start_date"><code class="tsd-tag">Optional</code><span>start_<wbr/>date</span><a href="#start_date" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">start_date</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>Filter workflows created on or after this ISO 8601 date string.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L303">refold.ts:303</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L353">refold.ts:353</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

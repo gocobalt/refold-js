@@ -11,7 +11,7 @@
 <li><a href="" aria-current="page">Refold</a></li></ul>
 <h1>Class Refold</h1></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L479">refold.ts:479</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L552">refold.ts:552</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -77,7 +77,7 @@
 </div></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="" class="tsd-signature-type tsd-kind-class">Refold</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L489">refold.ts:489</a></li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L562">refold.ts:562</a></li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -85,7 +85,7 @@
 <h3 class="tsd-anchor-link" id="token"><span>token</span><a href="#token" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">token</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L481">refold.ts:481</a></li></ul></aside></section></section></details>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L554">refold.ts:554</a></li></ul></aside></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -106,7 +106,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The specified config.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L869">refold.ts:869</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L996">refold.ts:996</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="connect"><span>connect</span><a href="#connect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -121,10 +121,21 @@
 <li><span><span class="tsd-kind-parameter">params</span>: <a href="../interfaces/ConnectParams.html" class="tsd-signature-type tsd-kind-interface">ConnectParams</a></span>
 <div class="tsd-comment tsd-typography"><p>The parameters for connecting the application.</p>
 </div>
+<div class="tsd-comment tsd-typography"><p>Which credentials a connect uses, and what to store against the connection.</p>
+</div>
 <ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5 id="authprofileid"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">authProfileId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>The credential set to connect with, from an application's auth profiles. Omitted,
+the application's default profile is used.</p>
+</div></li>
 <li class="tsd-parameter">
 <h5 id="autoclose"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">autoClose</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
 <div class="tsd-comment tsd-typography"><p>Whether to close the authentication window automatically once the connection succeeds or the wait times out.</p>
+</div></li>
+<li class="tsd-parameter">
+<h5 id="connectionid"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">connectionId</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>An existing connection to re-authenticate instead of opening a new one.</p>
 </div></li>
 <li class="tsd-parameter">
 <h5 id="granttype"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">grantType</span><span class="tsd-signature-symbol">?: </span><a href="../enums/GrantType.html" class="tsd-signature-type tsd-kind-enum">GrantType</a></h5>
@@ -138,6 +149,12 @@ explicitly and it is not needed.</p>
 <li class="tsd-parameter">
 <h5 id="payload"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">payload</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h5>
 <div class="tsd-comment tsd-typography"><p>The key value pairs of auth data.</p>
+</div></li>
+<li class="tsd-parameter">
+<h5 id="prerequisitefields"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">preRequisiteFields</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Values the application requires before it can be connected. Read by applications
+on auth profiles and by connectors; other native applications take theirs as flat
+keys in <code>payload</code>.</p>
 </div></li>
 <li class="tsd-parameter">
 <h5 id="signal"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">signal</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">AbortSignal</span></h5>
@@ -160,6 +177,10 @@ to end such a wait before the <code>timeout</code>.</p>
 one of a universal connector's own types (a key of
 <a href="../interfaces/Application.html#auth_type_options" class="tsd-kind-property">Application.auth_type_options</a>). If not provided, it defaults to <code>keybased</code>
 when a payload is given, otherwise <code>oauth2</code>.</p>
+</div></li>
+<li class="tsd-parameter">
+<h5 id="userdefinedfields"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">userDefinedFields</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h5>
+<div class="tsd-comment tsd-typography"><p>Caller metadata to store against the connection.</p>
 </div></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4><p>A promise that resolves to true if the connection was successful, otherwise false.</p>
 
@@ -168,7 +189,7 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 <h4 class="tsd-anchor-link" id="throws">Throws<a href="#throws" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><p>Throws an error if the authentication type is invalid or the connection fails.</p>
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L818">refold.ts:818</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L938">refold.ts:938</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="createworkflow"><span>create<wbr/>Workflow</span><a href="#createworkflow" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -199,12 +220,12 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/PublicWorkflow.html" class="tsd-signature-type tsd-kind-interface">PublicWorkflow</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The created public workflow.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1152">refold.ts:1152</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1301">refold.ts:1301</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="deleteconfig"><span>delete<wbr/>Config</span><a href="#deleteconfig" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="deleteconfig-1"><span class="tsd-kind-call-signature">deleteConfig</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">configId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#deleteconfig-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="deleteconfig-1"><span class="tsd-kind-call-signature">deleteConfig</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">configId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#deleteconfig-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Delete the specified config.</p>
 </div>
@@ -216,15 +237,18 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">configId</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>The unique ID of the config.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection whose config this acts on.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L962">refold.ts:962</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1107">refold.ts:1107</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="deleteconfigfield"><span>delete<wbr/>Config<wbr/>Field</span><a href="#deleteconfigfield" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="deleteconfigfield-1"><span class="tsd-kind-call-signature">deleteConfigField</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#deleteconfigfield-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="deleteconfigfield-1"><span class="tsd-kind-call-signature">deleteConfigField</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#deleteconfigfield-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Delete the specified config field value.</p>
 </div>
@@ -239,10 +263,13 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">workflowId</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>The unique ID of the workflow.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection whose config this acts on.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1064">refold.ts:1064</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1212">refold.ts:1212</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="deleteworkflow"><span>delete<wbr/>Workflow</span><a href="#deleteworkflow" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -259,12 +286,12 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1180">refold.ts:1180</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1329">refold.ts:1329</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="disconnect"><span>disconnect</span><a href="#disconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="disconnect-1"><span class="tsd-kind-call-signature">disconnect</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">type</span><span class="tsd-signature-symbol">?:</span> <a href="../enums/AuthType.html" class="tsd-signature-type tsd-kind-enum">AuthType</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#disconnect-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="disconnect-1"><span class="tsd-kind-call-signature">disconnect</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">type</span><span class="tsd-signature-symbol">?:</span> <a href="../enums/AuthType.html" class="tsd-signature-type tsd-kind-enum">AuthType</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><a href="#disconnect-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Disconnect the specified application and remove any associated data from Refold.</p>
 </div>
@@ -276,10 +303,14 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">type</span>: <a href="../enums/AuthType.html" class="tsd-signature-type tsd-kind-enum">AuthType</a></span>
 <div class="tsd-comment tsd-typography"><p>The authentication type to use. If not provided, it'll remove all the connected accounts.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection to revoke. Required where the
+application holds more than one; the server answers 400 rather than choosing.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L848">refold.ts:848</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L975">refold.ts:975</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="executeworkflow"><span>execute<wbr/>Workflow</span><a href="#executeworkflow" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -295,6 +326,15 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 <div class="tsd-comment tsd-typography"><p>The execution payload.</p>
 </div>
 <ul class="tsd-parameters">
+<li class="tsd-parameter">
+<h5 id="config_id"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">config_id</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>The config to execute against.</p>
+</div></li>
+<li class="tsd-parameter">
+<h5 id="connection_id"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">connection_id</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>The connection to authenticate the run through. One <code>config_id</code> can span several
+connections, so send both to name the config and the credentials.</p>
+</div></li>
 <li class="tsd-parameter">
 <h5 id="payload"><code class="tsd-tag">Optional</code><span class="tsd-kind-property">payload</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
 <div class="tsd-comment tsd-typography"><p>The payload to execute the workflow.</p>
@@ -313,7 +353,7 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 </div></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1224">refold.ts:1224</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1375">refold.ts:1375</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getapp"><span>get<wbr/>App</span><a href="#getapp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -325,7 +365,7 @@ when a payload is given, otherwise <code>oauth2</code>.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Application.html" class="tsd-signature-type tsd-kind-interface">Application</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The list of applications.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L549">refold.ts:549</a></li></ul></aside></div></li>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L622">refold.ts:622</a></li></ul></aside></div></li>
 <li class="">
 <div class="tsd-signature tsd-anchor-link" id="getapp-2"><span class="tsd-kind-call-signature">getApp</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Application.html" class="tsd-signature-type tsd-kind-interface">Application</a><span class="tsd-signature-symbol">&gt;</span><a href="#getapp-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
@@ -341,7 +381,7 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Application.html" class="tsd-signature-type tsd-kind-interface">Application</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The application details.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L556">refold.ts:556</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L629">refold.ts:629</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getapps"><span>get<wbr/>Apps</span><a href="#getapps" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -353,12 +393,12 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Application.html" class="tsd-signature-type tsd-kind-interface">Application</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The list of applications.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L584">refold.ts:584</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L657">refold.ts:657</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getconfig"><span>get<wbr/>Config</span><a href="#getconfig" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getconfig-1"><span class="tsd-kind-call-signature">getConfig</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">configId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">excludeOptions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span><a href="#getconfig-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getconfig-1"><span class="tsd-kind-call-signature">getConfig</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">configId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">excludeOptions</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span><a href="#getconfig-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Returns the specified config.</p>
 </div>
@@ -373,16 +413,19 @@ the application is enabled in Refold.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">excludeOptions</span>: <span class="tsd-signature-type">boolean</span></span>
 <div class="tsd-comment tsd-typography"><p>Whether to exclude the options from the fields in the response.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection whose config this acts on.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The specified config.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L917">refold.ts:917</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1061">refold.ts:1061</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getconfigfield"><span>get<wbr/>Config<wbr/>Field</span><a href="#getconfigfield" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getconfigfield-1"><span class="tsd-kind-call-signature">getConfigField</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">payload</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span><a href="#getconfigfield-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getconfigfield-1"><span class="tsd-kind-call-signature">getConfigField</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">payload</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span><a href="#getconfigfield-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Returns the specified field of the config.</p>
 </div>
@@ -400,16 +443,19 @@ the application is enabled in Refold.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">payload</span>: <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></span>
 <div class="tsd-comment tsd-typography"><p>The payload to be sent in the request body.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection whose config this acts on.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The specified config field.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1011">refold.ts:1011</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1157">refold.ts:1157</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getconfigs"><span>get<wbr/>Configs</span><a href="#getconfigs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getconfigs-1"><span class="tsd-kind-call-signature">getConfigs</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">config_id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#getconfigs-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getconfigs-1"><span class="tsd-kind-call-signature">getConfigs</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">config_id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">connection_id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#getconfigs-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Returns the configs created for the specified application.</p>
 </div>
@@ -418,11 +464,14 @@ the application is enabled in Refold.</p>
 <ul class="tsd-parameter-list">
 <li><span><span class="tsd-kind-parameter">slug</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>The application slug.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Narrows the result to one connection's configs.</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">config_id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The configs created for the specified application.</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{</span> <span class="tsd-kind-property">config_id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span> <span class="tsd-kind-property">connection_id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The configs created for the specified application.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L895">refold.ts:895</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1038">refold.ts:1038</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getexecution"><span>get<wbr/>Execution</span><a href="#getexecution" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -440,7 +489,7 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Execution.html" class="tsd-signature-type tsd-kind-interface">Execution</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The specified execution log.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1284">refold.ts:1284</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1438">refold.ts:1438</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getexecutions"><span>get<wbr/>Executions</span><a href="#getexecutions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -495,12 +544,12 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">PaginatedResponse</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Execution.html" class="tsd-signature-type tsd-kind-interface">Execution</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The paginated workflow execution logs.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1258">refold.ts:1258</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1412">refold.ts:1412</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getfieldoptions"><span>get<wbr/>Field<wbr/>Options</span><a href="#getfieldoptions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="getfieldoptions-1"><span class="tsd-kind-call-signature">getFieldOptions</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">lhs</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/RuleOptions.html" class="tsd-signature-type tsd-kind-interface">RuleOptions</a><span class="tsd-signature-symbol">&gt;</span><a href="#getfieldoptions-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="getfieldoptions-1"><span class="tsd-kind-call-signature">getFieldOptions</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">lhs</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/RuleOptions.html" class="tsd-signature-type tsd-kind-interface">RuleOptions</a><span class="tsd-signature-symbol">&gt;</span><a href="#getfieldoptions-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Returns the options for the specified field.</p>
 </div>
@@ -518,11 +567,14 @@ the application is enabled in Refold.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">workflowId</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>The unique ID of the workflow, if this is a workflow field.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection whose config to resolve against.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/RuleOptions.html" class="tsd-signature-type tsd-kind-interface">RuleOptions</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The specified rule field's options.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1089">refold.ts:1089</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1238">refold.ts:1238</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getworkflowpayload"><span>get<wbr/>Workflow<wbr/>Payload</span><a href="#getworkflowpayload" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -540,7 +592,7 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/WorkflowPayloadResponse.html" class="tsd-signature-type tsd-kind-interface">WorkflowPayloadResponse</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The workflow payload response.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1201">refold.ts:1201</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1350">refold.ts:1350</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="getworkflows"><span>get<wbr/>Workflows</span><a href="#getworkflows" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -586,7 +638,7 @@ the application is enabled in Refold.</p>
 </div></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">PaginatedResponse</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/PublicWorkflow.html" class="tsd-signature-type tsd-kind-interface">PublicWorkflow</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1122">refold.ts:1122</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1271">refold.ts:1271</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="toggleconfigworkflow"><span>toggle<wbr/>Config<wbr/>Workflow</span><a href="#toggleconfigworkflow" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -604,7 +656,7 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ConfigWorkflow.html" class="tsd-signature-type tsd-kind-interface">ConfigWorkflow</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><p>The updated list of workflows in the config.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L983">refold.ts:983</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1128">refold.ts:1128</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="updateconfig"><span>update<wbr/>Config</span><a href="#updateconfig" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -622,12 +674,12 @@ the application is enabled in Refold.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The specified config.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L938">refold.ts:938</a></li></ul></aside></div></li></ul></section>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1082">refold.ts:1082</a></li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="updateconfigfield"><span>update<wbr/>Config<wbr/>Field</span><a href="#updateconfigfield" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="updateconfigfield-1"><span class="tsd-kind-call-signature">updateConfigField</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span><a href="#updateconfigfield-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="updateconfigfield-1"><span class="tsd-kind-call-signature">updateConfigField</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">slug</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">fieldId</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">number</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">boolean</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">workflowId</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">opts</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span><a href="#updateconfigfield-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Update the specified config field value.</p>
 </div>
@@ -645,11 +697,14 @@ the application is enabled in Refold.</p>
 </div></li>
 <li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">workflowId</span>: <span class="tsd-signature-type">string</span></span>
 <div class="tsd-comment tsd-typography"><p>The unique ID of the workflow.</p>
+</div></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">opts</span>: <a href="../interfaces/ConnectionScoped.html" class="tsd-signature-type tsd-kind-interface">ConnectionScoped</a><span class="tsd-signature-symbol"> = {}</span></span>
+<div class="tsd-comment tsd-typography"><p>Names the connection whose config this acts on.</p>
 </div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/Config.html" class="tsd-signature-type tsd-kind-interface">Config</a><span class="tsd-signature-symbol">&gt;</span></h4><p>The updated config field.</p>
 <aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/f449f63caf2f3bd7ac96fe925f3e5ea34d11309e/refold.ts#L1038">refold.ts:1038</a></li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in <a href="https://github.com/gocobalt/cobalt-js/blob/15805a60612b962da226ad03e1c0a958ee65627b/refold.ts#L1185">refold.ts:1185</a></li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
