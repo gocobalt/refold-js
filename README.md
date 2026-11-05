@@ -54,6 +54,16 @@ const refold = new Refold({
     token: "REFOLD_SESSION_TOKEN",
 });
 
+// initialize with a callback that fetches a token from your backend
+const refold = new Refold({
+    // called on start, shortly before the token expires, and when a request is rejected with 401
+    getToken: async () => {
+        // e.g. your backend calls Refold's session token endpoint for the signed-in customer
+        const { token, expires_in } = await fetch("/api/refold-token", { method: "POST" }).then(res => res.json());
+        return { access_token: token, expires_in };
+    },
+});
+
 // Or, initialize without either
 const refold = new Refold();
 // and you can set the token later.
@@ -69,6 +79,13 @@ Create one instance per page load, in the browser, with a code minted on your
 backend for that page load. Instances on the same page given the same code share
 one exchange, but a reload, a second tab, or constructing the SDK during
 server-side rendering each spends the code again — and a spent code is rejected.
+
+Use `getToken` when a page can outlive its token: a token that expires or is revoked
+mid-session otherwise fails every later call. Resolve `{ access_token, expires_in }`.
+The SDK fetches a new token shortly before `expires_in` runs out, even on an idle page, and when a request
+is rejected with 401 it fetches one and retries that request once. Tokens are held in
+memory only. `getToken` supersedes `code`; with `token` also given, that token is used
+first.
 
 # Documentation
 

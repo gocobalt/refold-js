@@ -34,13 +34,14 @@ The entire SDK is a single `Refold` class using native `fetch` API. No external 
 - Bearer token auth via `Authorization` header on all requests, assembled by the private `bearer()` helper that every call site routes through
 - Token set via constructor option or `refold.token = "..."` after initialization
 - Alternatively a single-use `code` (from a `/connect/<code>` URL) is exchanged for a session token in the constructor (so `connect()`'s popup is not opened behind a round-trip) via `POST /api/v2/public/connect-code/exchange`. The exchange is unauthenticated — possession of the code is the credential — is shared per page by every call and every instance given the same code (a module-level map keyed by base URL + code) so the code is spent once, and is not cached on failure so a network blip stays retryable. An explicit `token` wins over a `code`.
+- Alternatively a `getToken()` callback supplies tokens (`{ access_token, expires_in? }`, the OAuth token response shape). It is called up front in the constructor (same popup reason as the code exchange), then on a timer `TOKEN_REFRESH_MARGIN` (60s) before expiry (half the lifetime for tokens under 2 minutes), so a page left idle still holds a valid token when `connect()` is clicked and no `getToken` round-trip lands in its click path. The timer holds the instance through a `WeakRef`, so an instance the app drops stops refreshing, and it is `unref`'d so it never keeps Node alive. Fallbacks for a late timer or a failed timed refresh: a request within the margin refreshes in the background (the request still goes out with the current token), and a request after expiry refreshes synchronously. Every authenticated call goes through the private `request()` wrapper, which on a 401 fetches a new token and resends the request once; overlapping refreshes share one `getToken()` call, and a failed one is not kept. Tokens are held in memory only. `getToken` supersedes `code`; a `token` passed alongside it is used first. Without `getToken`, a 401 is thrown as before.
 - Default base URL: `https://app.refold.ai` (configurable via `baseUrl` option)
 
 ### Public API
 
 **Constructor:**
 ```typescript
-const refold = new Refold({ code?: string, token?: string, baseUrl?: string })
+const refold = new Refold({ code?: string, token?: string, getToken?: () => Promise<AccessToken>, baseUrl?: string })
 ```
 
 **Application Management:**
@@ -111,7 +112,7 @@ The `/integrate` call is **always a POST** with the fields in the JSON body; the
 - A response carrying neither `auth_url` nor a boolean `connected` throws an `Error` tagged `code: "UNEXPECTED_INTEGRATE_RESPONSE"`.
 
 ### Error Handling
-All 4xx/5xx HTTP responses throw the parsed JSON error response. No try/catch in SDK — errors propagate to caller. Two OAuth-flow exceptions: a blocked popup rejects with a plain `Error` tagged `code: "POPUP_BLOCKED"`, and connection-status polling tolerates up to 3 consecutive errors (logged via `console.error`) before rejecting.
+All 4xx/5xx HTTP responses throw the parsed JSON error response. No try/catch in SDK — errors propagate to caller. Exceptions: a blocked popup rejects with a plain `Error` tagged `code: "POPUP_BLOCKED"`; connection-status polling tolerates up to 3 consecutive errors (logged via `console.error`) before rejecting; and with `getToken`, a 401 is retried once with a new token (only the retry's error is thrown), a `getToken()` rejection is thrown as-is in place of the response, and a `getToken()` result without `access_token` throws an `Error` tagged `code: "GET_TOKEN_FAILED"`.
 
 ### Backend API Endpoints Used
 All requests include `Authorization: Bearer ${token}`:
@@ -122,7 +123,7 @@ All requests include `Authorization: Bearer ${token}`:
 - Executions: `/api/v2/public/execution`
 
 ### Browser & Node Compatibility
-- **Browser:** Uses native `fetch`, `window.open()` for OAuth popups, `setInterval` for polling
+- **Browser:** Uses native `fetch`, `window.open()` for OAuth popups, `setInterval` for polling, `setTimeout` + `WeakRef` for `getToken` refresh (no timer where `WeakRef` is missing; requests still refresh)
 - **Node.js:** Works in Node 18+ (native fetch). No browser APIs called in non-OAuth flows.
 
 ## TypeScript Configuration
@@ -134,7 +135,7 @@ All requests include `Authorization: Bearer ${token}`:
 
 ## Version History
 
-- **v10.9:** `code` constructor option — the single-use code from a connect URL, exchanged for a session token and held in memory only, so no session token rides in the URL. `token` still accepted for the migration window.
+- **v10.9:** `code` constructor option — the single-use code from a connect URL, exchanged for a session token and held in memory only, so no session token rides in the URL. `token` still accepted for the migration window. `getToken` constructor option — a callback for tokens that expire mid-session (OAuth access tokens last 15 minutes, session tokens 7 days): refreshed shortly before `expires_in`, and on a 401 the request is retried once with a new token.
 - **v10.8:** Multi-auth support. An application can hold several connections per linked account (`Application.has_multi_auth_enabled`), each named by a `connection_id` on `connected_accounts`. `connect()` takes `authProfileId` / `connectionId` / `userDefinedFields` / `preRequisiteFields`; `disconnect()`, the config family and `executeWorkflow()` take the connection to act on — `disconnect()` **needs** it once an account holds more than one, as the server answers 400 rather than guessing, and an account holds one config per connection under the same `config_id`, so config calls without it silently targeted the default connection. The OAuth poll no longer resolves on *any* active OAuth account: it diffs against a snapshot taken concurrently with `/integrate`, so adding a second connection or reconnecting an expired one no longer resolves before the user has authenticated. Applications holding a single connection are unaffected. Additive throughout — no existing call site changes.
 - **v10.7:** Lowered `DEFAULT_CONNECT_TIMEOUT` from 5 to 3 minutes, since the timeout is what bounds every case the window handle can't be believed for. Restored the fast `false` for a user who abandons the flow, without reintroducing the v10.6 bug. `closed` is now trusted only when the handle has been seen alive: since `closed` is monotonic, one reading a `POLL_INTERVAL` after `window.open` decides the run — still open ⇒ live handle, so a later close ends the wait as it did before v10.6; already closed ⇒ severed, so only `timeout` ends it. Works because the severing response must arrive before the user can see the page it renders. Also added `signal?: AbortSignal` to `connect()`, resolving `false` on abort — the only escape before `timeout` for a severed handle, since an abandoned flow is undetectable there.
 - **v10.6:** OAuth polling no longer ends when the auth window reports itself closed. A provider serving any page in the auth chain with `Cross-Origin-Opener-Policy: same-origin` (Calendly's `/app/login`) has it placed in a fresh browsing context group, discarding the context `window.open` returned — so the handle reports `closed` while the tab is still open and `close()` on it is a no-op. That ended runs ~9s in (first tick at 3s latched the grace, which expired at 9s) for anyone not already signed in to the provider. A severed handle is indistinguishable from a genuinely closed one, so `timeout` is now the only bound: exits are success, `timeout` (+ `POLL_GRACE`), or 3 consecutive poll failures. Cost: an abandoned flow resolves `false` at `timeout` rather than ~9s, and `timeout: 0` now never settles.

@@ -10,9 +10,9 @@
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
 <li><a href="" aria-current="page">RefoldOptions</a></li></ul>
 <h1>Interface RefoldOptions</h1></div>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">RefoldOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#baseurl">baseUrl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#code">code</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#token">token</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">RefoldOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#baseurl">baseUrl</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#code">code</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#gettoken">getToken</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="AccessToken.html" class="tsd-signature-type tsd-kind-interface">AccessToken</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#token">token</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/3dd700b69712fb3eef92f961b61486463e89e45f/refold.ts#L291">refold.ts:291</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/2fbbacf1e01d9cada433a99e6acbe9d9fd12cda1/refold.ts#L292">refold.ts:292</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -22,6 +22,7 @@
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#baseurl" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>base<wbr/>Url?</span></a>
 <a href="#code" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>code?</span></a>
+<a href="#gettoken" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>get<wbr/>Token?</span></a>
 <a href="#token" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>token?</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -33,24 +34,35 @@
 <div class="tsd-comment tsd-typography"><p>The base URL of the Refold API. You don't need to set this.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/3dd700b69712fb3eef92f961b61486463e89e45f/refold.ts#L293">refold.ts:293</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/2fbbacf1e01d9cada433a99e6acbe9d9fd12cda1/refold.ts#L294">refold.ts:294</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="code"><code class="tsd-tag">Optional</code><span>code</span><a href="#code" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">code</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The single-use code from a connect URL, traded for a session token as soon as the SDK is
 constructed. Instances on one page given the same code share that exchange.
 Prefer this over <code>token</code>: a code that reaches the wrong person is already spent, whereas a
-token stays usable until it expires. Ignored if <code>token</code> is also given.</p>
+token stays usable until it expires. Ignored if <code>token</code> or <code>getToken</code> is also given.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/3dd700b69712fb3eef92f961b61486463e89e45f/refold.ts#L302">refold.ts:302</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/2fbbacf1e01d9cada433a99e6acbe9d9fd12cda1/refold.ts#L303">refold.ts:303</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="gettoken"><code class="tsd-tag">Optional</code><span>get<wbr/>Token</span><a href="#gettoken" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">getToken</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">()</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="AccessToken.html" class="tsd-signature-type tsd-kind-interface">AccessToken</a><span class="tsd-signature-symbol">&gt;</span></div>
+<div class="tsd-comment tsd-typography"><p>Fetches a token from your backend, for tokens that expire during a session. The SDK calls it
+when constructed, again shortly before the token's <code>expires_in</code> runs out (on a timer, so an
+idle page keeps a valid token), and again when a request is rejected with 401, which it then
+retries once. Tokens are held in memory only.
+With <code>token</code> also given, that token is used first and this is called only to replace it.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/2fbbacf1e01d9cada433a99e6acbe9d9fd12cda1/refold.ts#L311">refold.ts:311</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="token"><code class="tsd-tag">Optional</code><span>token</span><a href="#token" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">token</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>The session token.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/3dd700b69712fb3eef92f961b61486463e89e45f/refold.ts#L295">refold.ts:295</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/gocobalt/refold-js/blob/2fbbacf1e01d9cada433a99e6acbe9d9fd12cda1/refold.ts#L296">refold.ts:296</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -67,7 +79,7 @@ token stays usable until it expires. Ignored if <code>token</code> is also given
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#baseurl"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>base<wbr/>Url</span></a><a href="#code"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>code</span></a><a href="#token"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>token</span></a></div></details></div></details></div>
+<div><a href="#baseurl"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>base<wbr/>Url</span></a><a href="#code"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>code</span></a><a href="#gettoken"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>get<wbr/>Token</span></a><a href="#token"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>token</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">@refoldai/refold-js</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

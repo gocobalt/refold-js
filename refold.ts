@@ -1,3 +1,4 @@
+/// <reference lib="es2021.weakref" />
 /**
  * Refold Frontend SDK
  */
@@ -297,9 +298,25 @@ export interface RefoldOptions {
      * The single-use code from a connect URL, traded for a session token as soon as the SDK is
      * constructed. Instances on one page given the same code share that exchange.
      * Prefer this over `token`: a code that reaches the wrong person is already spent, whereas a
-     * token stays usable until it expires. Ignored if `token` is also given.
+     * token stays usable until it expires. Ignored if `token` or `getToken` is also given.
      */
     code?: string;
+    /**
+     * Fetches a token from your backend, for tokens that expire during a session. The SDK calls it
+     * when constructed, again shortly before the token's `expires_in` runs out (on a timer, so an
+     * idle page keeps a valid token), and again when a request is rejected with 401, which it then
+     * retries once. Tokens are held in memory only.
+     * With `token` also given, that token is used first and this is called only to replace it.
+     */
+    getToken?: () => Promise<AccessToken>;
+}
+
+/** What a {@link RefoldOptions.getToken} callback resolves to: the shape of an OAuth token response. */
+export interface AccessToken {
+    /** The token, sent as `Authorization: Bearer <access_token>`. */
+    access_token: string;
+    /** How many seconds the token stays valid. Without it, the token is replaced only after a 401. */
+    expires_in?: number;
 }
 
 export interface RuleOptions {
@@ -562,6 +579,11 @@ const randomId = (): string | undefined => {
  */
 const exchanges = new Map<string, { claim?: string; token?: Promise<string> }>();
 
+/** How long before a `getToken` token expires, in milliseconds, the SDK starts fetching the next one. */
+const TOKEN_REFRESH_MARGIN = 60e3;
+/** The longest delay `setTimeout` honours; a longer one fires at once. */
+const MAX_TIMER_DELAY = 2 ** 31 - 1;
+
 /** The number of consecutive polling failures tolerated before authentication is aborted. */
 const MAX_POLL_FAILURES = 3;
 /** The default maximum time, in milliseconds, to wait for authentication. */
@@ -582,12 +604,20 @@ class Refold {
     private baseUrl: string;
     public token: string;
     private code: string;
+    private getToken?: () => Promise<AccessToken>;
+    /** When the token expires, in epoch milliseconds. `Infinity` when its lifetime is unknown. */
+    private tokenExpiresAt = Infinity;
+    /** The `getToken` call in flight, shared by everything waiting on a new token. */
+    private tokenRequest?: Promise<void>;
+    /** Fetches the next token before this one expires. */
+    private tokenRefreshTimer?: ReturnType<typeof setTimeout>;
 
     /**
      * Refold Frontend SDK
      * @param {Object} options The options to configure the Refold SDK.
      * @param {String} [options.code] The single-use code from a connect URL.
      * @param {String} [options.token] The session token.
+     * @param {Function} [options.getToken] Fetches a token from your backend, initially and whenever the current one expires.
      * @param {String} [options.baseUrl=https://app.refold.ai] The base URL of the Refold API.
      */
     constructor(options: RefoldOptions = {}) {
@@ -597,14 +627,16 @@ class Refold {
                 :   "https://" + options.baseUrl
             :   "https://app.refold.ai";
         this.token = options.token || "";
-        this.code = options.code || "";
+        this.getToken = options.getToken;
+        // A callback can always fetch a fresh token, so it supersedes a code that is spent once.
+        this.code = this.getToken ? "" : options.code || "";
 
-        if (this.code && !this.token) {
-            // Exchanged up front, not on the first call. `connect()` opens a popup immediately
+        if (!this.token && (this.getToken || this.code)) {
+            // Fetched up front, not on the first call. `connect()` opens a popup immediately
             // after its request, and browsers drop user activation across a network round-trip —
-            // an exchange in that path gets the popup blocked. Failures are swallowed here and
+            // a fetch in that path gets the popup blocked. Failures are swallowed here and
             // resurfaced on the call that actually needs the token.
-            void this.startExchange().catch(() => undefined);
+            void (this.getToken ? this.refreshToken() : this.startExchange()).catch(() => undefined);
         }
     }
 
@@ -615,8 +647,77 @@ class Refold {
      * @private
      */
     private async bearer(): Promise<string> {
-        if (!this.token && this.code) this.token = await this.startExchange();
+        if (this.getToken) {
+            if (!this.token || Date.now() >= this.tokenExpiresAt) {
+                await this.refreshToken();
+            } else if (Date.now() >= this.tokenExpiresAt - TOKEN_REFRESH_MARGIN) {
+                // Still valid, so this request goes out with it while the next one is fetched:
+                // waiting here would put a round-trip between a click and connect()'s popup.
+                void this.refreshToken().catch(() => undefined);
+            }
+        } else if (!this.token && this.code) {
+            this.token = await this.startExchange();
+        }
         return `Bearer ${this.token}`;
+    }
+
+    /**
+     * Replaces the token with one from `getToken`. Callers that overlap share one call, so a burst
+     * of requests, or of 401s, asks your backend once. A failure is not kept, so the next request
+     * asks again.
+     * @private
+     */
+    private refreshToken(): Promise<void> {
+        this.tokenRequest ??= this.fetchToken().then(() => {
+            this.tokenRequest = undefined;
+        }, (error: unknown) => {
+            this.tokenRequest = undefined;
+            throw error;
+        });
+        return this.tokenRequest;
+    }
+
+    /** @private */
+    private async fetchToken(): Promise<void> {
+        const token = await this.getToken?.();
+        if (!token?.access_token) {
+            throw Object.assign(new Error("getToken() resolved without an access_token."), { code: "GET_TOKEN_FAILED" });
+        }
+        this.token = token.access_token;
+        this.tokenExpiresAt = token.expires_in ? Date.now() + token.expires_in * 1e3 : Infinity;
+        this.scheduleTokenRefresh(token.expires_in);
+    }
+
+    /**
+     * Fetches the next token before this one expires, whether or not the page makes a request, so
+     * a page left idle past expiry doesn't put a `getToken` round-trip in `connect()`'s click path.
+     * The timer holds the instance weakly: an app that drops it stops the refreshes instead of
+     * keeping it alive. A failed refresh is left to the next request.
+     * @private
+     */
+    private scheduleTokenRefresh(expiresInSeconds?: number): void {
+        clearTimeout(this.tokenRefreshTimer);
+        if (!expiresInSeconds || typeof WeakRef !== "function") return;
+        const lifetimeMs = expiresInSeconds * 1e3;
+        const instance = new WeakRef(this);
+        this.tokenRefreshTimer = setTimeout(() => {
+            void instance.deref()?.refreshToken().catch(() => undefined);
+        }, Math.min(Math.max(lifetimeMs - TOKEN_REFRESH_MARGIN, lifetimeMs / 2), MAX_TIMER_DELAY));
+        // In Node, a pending refresh must not keep the process from exiting.
+        (this.tokenRefreshTimer as unknown as { unref?: () => void }).unref?.();
+    }
+
+    /**
+     * `fetch` for every authenticated request. With `getToken`, a request rejected with 401 is sent
+     * once more with a new token, since the one it carried may have expired or been revoked.
+     * @private
+     */
+    private async request(url: string, init: RequestInit & { headers: Record<string, string> }): Promise<Response> {
+        const res = await fetch(url, init);
+        if (res.status !== 401 || !this.getToken) return res;
+        // Another request's 401 may already have replaced the token this one carried.
+        if (init.headers.authorization === `Bearer ${this.token}`) await this.refreshToken();
+        return fetch(url, { ...init, headers: { ...init.headers, authorization: `Bearer ${this.token}` } });
     }
 
     /**
@@ -678,7 +779,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     public async getAccountDetails(): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v3/org/basics`, {
+        const res = await this.request(`${this.baseUrl}/api/v3/org/basics`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -699,7 +800,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     public async updateAccount(payload: Record<string, unknown>): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/linked-account`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/linked-account`, {
             method: "PUT",
             headers: {
                 authorization: await this.bearer(),
@@ -739,7 +840,7 @@ class Refold {
      * @returns {Promise<Application | Application[]>} The application details.
      */
     public async getApp(slug?: string): Promise<Application | Application[]> {
-        const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/application${slug ? `/${slug}` : ""}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/f-sdk/application${slug ? `/${slug}` : ""}`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -759,7 +860,7 @@ class Refold {
      * @returns {Promise<Application[]>} The list of applications.
      */
     public async getApps(): Promise<Application[]> {
-        const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/application`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/f-sdk/application`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -797,7 +898,7 @@ class Refold {
         params?: Record<string, unknown>,
     ): Promise<{ auth_url?: string; connected?: boolean }> {
         const url = `${this.baseUrl}/api/v1/${slug}/integrate`;
-        const res = await fetch(url, {
+        const res = await this.request(url, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1000,7 +1101,7 @@ class Refold {
         // exactly the credentials it always was. A connector with a single key-based type has
         // it inferred server-side.
         const connectorAuthType = authType && authType !== AuthType.KeyBased ? authType : undefined;
-        const res = await fetch(`${this.baseUrl}/api/v2/app/${slug}/save`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/app/${slug}/save`, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1077,7 +1178,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     public async disconnect(slug: string, type?: AuthType, opts: ConnectionScoped = {}): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${this.query({ auth_type: type, connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v1/linked-acc/integration/${slug}${this.query({ auth_type: type, connection_id: opts.connectionId })}`, {
             method: "DELETE",
             headers: {
                 authorization: await this.bearer(),
@@ -1098,7 +1199,7 @@ class Refold {
      * @returns {Promise<Config>} The specified config.
      */
     public async config(payload: ConfigPayload): Promise<Config> {
-        const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/config`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/f-sdk/config`, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1140,7 +1241,7 @@ class Refold {
      * @returns {Promise<{ config_id: string; connection_id?: string; }[]>} The configs created for the specified application.
      */
     async getConfigs(slug: string, opts: ConnectionScoped = {}): Promise<{ config_id: string; connection_id?: string; }[]> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/configs${this.query({ connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/slug/${slug}/configs${this.query({ connection_id: opts.connectionId })}`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -1163,7 +1264,7 @@ class Refold {
      * @returns {Promise<Config>} The specified config.
      */
     async getConfig(slug: string, configId: string, excludeOptions?: boolean, opts: ConnectionScoped = {}): Promise<Config> {
-        const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}${this.query({ connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}${this.query({ connection_id: opts.connectionId })}`, {
             headers: {
                 authorization: await this.bearer(),
                 ...(excludeOptions ? { disable_field_options: "true" } : {}),
@@ -1184,7 +1285,7 @@ class Refold {
      * @returns {Promise<Config>} The specified config.
      */
     async updateConfig(payload: UpdateConfigPayload): Promise<Config> {
-        const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/config`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/f-sdk/config`, {
             method: "PUT",
             headers: {
                 authorization: await this.bearer(),
@@ -1209,7 +1310,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     async deleteConfig(slug: string, configId?: string, opts: ConnectionScoped = {}): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}${this.query({ connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/f-sdk/slug/${slug}/config${configId ? `/${configId}` : ""}${this.query({ connection_id: opts.connectionId })}`, {
             method: "DELETE",
             headers: {
                 authorization: await this.bearer(),
@@ -1231,7 +1332,7 @@ class Refold {
      */
     async toggleConfigWorkflow(payload: ToggleConfigWorkflowPayload): Promise<ConfigWorkflow[]> {
         const { slug, config_id, workflow_id, enabled, connection_id } = payload;
-        const res = await fetch(`${this.baseUrl}/api/v2/public/slug/${slug}/config/${config_id}/workflows/${workflow_id}${this.query({ connection_id })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/slug/${slug}/config/${config_id}/workflows/${workflow_id}${this.query({ connection_id })}`, {
             method: "PATCH",
             headers: {
                 authorization: await this.bearer(),
@@ -1259,7 +1360,7 @@ class Refold {
      * @returns {Promise<Field>} The specified config field.
      */
     async getConfigField(slug: string, fieldId: string, workflowId?: string, payload?: Record<string, unknown>, opts: ConnectionScoped = {}): Promise<Config> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1287,7 +1388,7 @@ class Refold {
      * @returns {Promise<Field>} The updated config field.
      */
     async updateConfigField(slug: string, fieldId: string, value: string | number | boolean | null, workflowId?: string, opts: ConnectionScoped = {}): Promise<Config> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
             method: "PUT",
             headers: {
                 authorization: await this.bearer(),
@@ -1314,7 +1415,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     async deleteConfigField(slug: string, fieldId: string, workflowId?: string, opts: ConnectionScoped = {}): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/config/field/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
             method: "DELETE",
             headers: {
                 authorization: await this.bearer(),
@@ -1340,7 +1441,7 @@ class Refold {
      * @returns {Promise<RuleOptions>} The specified rule field's options.
      */
     async getFieldOptions(lhs: string, slug: string, fieldId: string, workflowId?: string, opts: ConnectionScoped = {}): Promise<RuleOptions> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/config/rule-engine/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/config/rule-engine/${fieldId}${this.query({ workflow_id: workflowId, connection_id: opts.connectionId })}`, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1379,7 +1480,7 @@ class Refold {
             if (value !== undefined && value !== "") query.set(key, String(value));
         }
 
-        const res = await fetch(`${this.baseUrl}/api/v2/public/workflow?${query}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/workflow?${query}`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -1403,7 +1504,7 @@ class Refold {
      * @returns {Promise<PublicWorkflow>} The created public workflow.
      */
     async createWorkflow(params: PublicWorkflowPayload): Promise<PublicWorkflow> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/workflow`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/workflow`, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1431,7 +1532,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     async deleteWorkflow(workflowId: string): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/workflow/${workflowId}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/workflow/${workflowId}`, {
             method: "DELETE",
             headers: {
                 authorization: await this.bearer(),
@@ -1452,7 +1553,7 @@ class Refold {
      * @returns {Promise<WorkflowPayloadResponse>} The workflow payload response.
      */
     async getWorkflowPayload(workflowId: string): Promise<WorkflowPayloadResponse> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/workflow/request-structure/${workflowId}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/workflow/request-structure/${workflowId}`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -1477,7 +1578,7 @@ class Refold {
      * @returns {Promise<unknown>}
      */
     async executeWorkflow(options: ExecuteWorkflowPayload): Promise<unknown> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/workflow/${options?.worklfow}/execute`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/workflow/${options?.worklfow}/execute`, {
             method: "POST",
             headers: {
                 authorization: await this.bearer(),
@@ -1520,7 +1621,7 @@ class Refold {
             if (value !== undefined && value !== "") query.set(key, String(value));
         }
 
-        const res = await fetch(`${this.baseUrl}/api/v2/public/execution?${query}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/execution?${query}`, {
             headers: {
                 authorization: await this.bearer(),
             },
@@ -1540,7 +1641,7 @@ class Refold {
      * @returns {Promise<Execution>} The specified execution log.
      */
     async getExecution(executionId: string): Promise<Execution> {
-        const res = await fetch(`${this.baseUrl}/api/v2/public/execution/${executionId}`, {
+        const res = await this.request(`${this.baseUrl}/api/v2/public/execution/${executionId}`, {
             headers: {
                 authorization: await this.bearer(),
             },
