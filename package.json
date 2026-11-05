@@ -1,6 +1,6 @@
 {
   "name": "@refoldai/refold-js",
-  "version": "10.8.0-beta.1",
+  "version": "10.9.0-beta.1",
   "description": "Refold frontend SDK",
   "main": "./refold.js",
   "typings": "./refold.d.ts",
@@ -8,7 +8,7 @@
     "build": "tsc",
     "docs": "npx typedoc refold.ts",
     "docs:llms": "npx typedoc refold.ts --plugin typedoc-plugin-markdown --mergeReadme --enumMembersFormat table --parametersFormat table --propertiesFormat table --typeDeclarationFormat table --indexFormat table --outputFileStrategy modules --cleanOutputDir false --fileExtension .txt --out docs --entryFileName llms",
-    "test": "echo \"Warn: no test specified\""
+    "test": "npm run build && node --test"
   },
   "repository": {
     "type": "git",

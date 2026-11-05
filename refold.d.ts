@@ -268,6 +268,28 @@ export interface RefoldOptions {
     baseUrl?: string;
     /** The session token. */
     token?: string;
+    /**
+     * The single-use code from a connect URL, traded for a session token as soon as the SDK is
+     * constructed. Instances on one page given the same code share that exchange.
+     * Prefer this over `token`: a code that reaches the wrong person is already spent, whereas a
+     * token stays usable until it expires. Ignored if `token` or `getToken` is also given.
+     */
+    code?: string;
+    /**
+     * Fetches a token from your backend, for tokens that expire during a session. The SDK calls it
+     * when constructed, again shortly before the token's `expires_in` runs out (on a timer, so an
+     * idle page keeps a valid token), and again when a request is rejected with 401, which it then
+     * retries once. Tokens are held in memory only.
+     * With `token` also given, that token is used first and this is called only to replace it.
+     */
+    getToken?: () => Promise<AccessToken>;
+}
+/** What a {@link RefoldOptions.getToken} callback resolves to: the shape of an OAuth token response. */
+export interface AccessToken {
+    /** The token, sent as `Authorization: Bearer <access_token>`. */
+    access_token: string;
+    /** How many seconds the token stays valid. Without it, the token is replaced only after a 401. */
+    expires_in?: number;
 }
 export interface RuleOptions {
     rule_column: {
@@ -489,13 +511,66 @@ export interface Execution {
 declare class Refold {
     private baseUrl;
     token: string;
+    private code;
+    private getToken?;
+    /** When the token expires, in epoch milliseconds. `Infinity` when its lifetime is unknown. */
+    private tokenExpiresAt;
+    /** The `getToken` call in flight, shared by everything waiting on a new token. */
+    private tokenRequest?;
+    /** Fetches the next token before this one expires. */
+    private tokenRefreshTimer?;
     /**
      * Refold Frontend SDK
      * @param {Object} options The options to configure the Refold SDK.
+     * @param {String} [options.code] The single-use code from a connect URL.
      * @param {String} [options.token] The session token.
+     * @param {Function} [options.getToken] Fetches a token from your backend, initially and whenever the current one expires.
      * @param {String} [options.baseUrl=https://app.refold.ai] The base URL of the Refold API.
      */
     constructor(options?: RefoldOptions);
+    /**
+     * The `Authorization` header every request carries. A code's session token comes from the
+     * exchange the constructor started, and is held in memory only, so it never reaches the URL,
+     * storage or anywhere else the page can leak it.
+     * @private
+     */
+    private bearer;
+    /**
+     * Replaces the token with one from `getToken`. Callers that overlap share one call, so a burst
+     * of requests, or of 401s, asks your backend once. A failure is not kept, so the next request
+     * asks again.
+     * @private
+     */
+    private refreshToken;
+    /** @private */
+    private fetchToken;
+    /**
+     * Fetches the next token before this one expires, whether or not the page makes a request, so
+     * a page left idle past expiry doesn't put a `getToken` round-trip in `connect()`'s click path.
+     * The timer holds the instance weakly: an app that drops it stops the refreshes instead of
+     * keeping it alive. A failed refresh is left to the next request.
+     * @private
+     */
+    private scheduleTokenRefresh;
+    /**
+     * `fetch` for every authenticated request. With `getToken`, a request rejected with 401 is sent
+     * once more with a new token, since the one it carried may have expired or been revoked.
+     * @private
+     */
+    private request;
+    /**
+     * The page's one exchange of this code, shared by every call and every instance given it, so
+     * none of them races another to spend it. A failure is not cached — a spent code fails again
+     * anyway, while caching the rejection would let one network blip brick the page for good.
+     * @private
+     */
+    private startExchange;
+    /**
+     * Claims a connect code, which spends it. Unauthenticated by construction — possession of the
+     * code is the credential, and the page holding it has nothing else to present.
+     * @private
+     */
+    private exchangeCode;
     /**
      * Returns the org & customer details for the associated token.
      * @private
