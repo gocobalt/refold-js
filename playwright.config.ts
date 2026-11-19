@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { loadDotEnv } from "./e2e/harness/env";
+
+// Load e2e/.env so specs can read REFOLD_* (base URL, API key, linked account) for the real cases.
+loadDotEnv();
 
 /**
  * DEV-7914 — end-to-end tests of the SDK's connect flow in a real browser.

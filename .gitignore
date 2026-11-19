@@ -108,3 +108,6 @@ playwright-report/
 test-results/
 .auth/
 e2e/harness/refold.global.js
+
+# macOS
+.DS_Store
