@@ -102,3 +102,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# e2e (DEV-7914): Playwright outputs, provider sessions, and the bundled SDK the harness builds
+playwright-report/
+test-results/
+.auth/
+e2e/harness/refold.global.js

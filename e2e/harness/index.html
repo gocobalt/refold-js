@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>refold-js e2e harness</title>
+    <script src="./refold.global.js"></script>
+</head>
+<body>
+    <h1>refold-js e2e harness</h1>
+    <!-- A real click on this button is a trusted user gesture, so window.open is not popup-blocked.
+         Tests set window.__connectParams before clicking; for the no-gesture case they call
+         window.__refold.connect() directly from page.evaluate instead. -->
+    <button id="connect">Connect</button>
+    <button id="disconnect">Disconnect</button>
+    <pre id="result"></pre>
+    <script>
+        (function () {
+            const q = new URLSearchParams(location.search);
+            const { Refold } = window.RefoldSDK;
+
+            const opts = { baseUrl: q.get("baseUrl") || "https://app.refold.ai" };
+            if (q.get("token")) opts.token = q.get("token");
+            if (q.get("code")) opts.code = q.get("code");
+
+            const refold = new Refold(opts);
+            window.__refold = refold;
+            // Tests overwrite these before interacting.
+            window.__connectParams = q.get("slug") ? { slug: q.get("slug") } : {};
+            window.__disconnectOpts = {};
+            window.__result = undefined;
+
+            const show = (v) => {
+                window.__result = v;
+                document.getElementById("result").textContent = JSON.stringify(v);
+            };
+            const errCode = (e) => (e && e.code) ? e.code : String(e && e.message ? e.message : e);
+
+            document.getElementById("connect").addEventListener("click", async () => {
+                window.__result = undefined;
+                try { show({ ok: true, value: await refold.connect(window.__connectParams) }); }
+                catch (e) { show({ ok: false, error: errCode(e) }); }
+            });
+            document.getElementById("disconnect").addEventListener("click", async () => {
+                window.__result = undefined;
+                try { show({ ok: true, value: await refold.disconnect(window.__connectParams.slug, undefined, window.__disconnectOpts) }); }
+                catch (e) { show({ ok: false, error: errCode(e) }); }
+            });
+        })();
+    </script>
+</body>
+</html>
