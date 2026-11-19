@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { loadConfig } from "./harness/env";
 import { mintSessionToken } from "./harness/refold-admin";
 
@@ -11,6 +11,36 @@ const cfg = loadConfig();
 const SLUG = "confluence"; // platform OAuth creds on UAT; required flat field site_name
 const SITE = "acme-qa-test";
 
+/** Mint a fresh session token and open the harness page pointed at the target. */
+async function openHarness(page: Page): Promise<void> {
+    const token = await mintSessionToken(cfg);
+    await page.goto(`/?baseUrl=${encodeURIComponent(cfg.baseURL)}&token=${encodeURIComponent(token)}`);
+}
+
+interface ConnectOpts { slug: string; site: string; timeout: number; abortAfterMs?: number }
+type ConnectOutcome = { ok: true; value: boolean } | { ok: false; err: string };
+
+/** Assert the auth popup ends up closed, tolerating the close being already done or still in flight. */
+async function expectPopupClosed(popup: Page): Promise<void> {
+    if (!popup.isClosed()) await popup.waitForEvent("close", { timeout: 10_000 }).catch(() => { /* fall to assert */ });
+    expect(popup.isClosed()).toBe(true);
+}
+
+/** Drive refold.connect() in the page with a flat pre-req, a timeout, and an optional later abort. */
+function connectInPage(page: Page, opts: ConnectOpts): Promise<ConnectOutcome> {
+    return page.evaluate(async ({ slug, site, timeout, abortAfterMs }) => {
+        const refold = (window as unknown as { __refold: { connect: (p: unknown) => Promise<boolean> } }).__refold;
+        const params: Record<string, unknown> = { slug, type: "oauth2", payload: { site_name: site }, timeout };
+        if (abortAfterMs !== undefined) {
+            const ac = new AbortController();
+            params.signal = ac.signal;
+            setTimeout(() => ac.abort(), abortAfterMs);
+        }
+        try { return { ok: true as const, value: await refold.connect(params) }; }
+        catch (e) { return { ok: false as const, err: (e as { code?: string })?.code ?? String((e as Error)?.message ?? e) }; }
+    }, opts);
+}
+
 test.describe("redirect OAuth connect flow", () => {
     test.fixme("1. happy path: Connect → popup → consent → callback → popup closes → connect() resolves true; account active", async () => {});
     test.fixme("2. autoClose:false → resolves true and the popup stays open", async () => {});
@@ -18,8 +48,29 @@ test.describe("redirect OAuth connect flow", () => {
     test.fixme("4. user denies consent → no account created; closing the popup resolves false within ~9s", async () => {});
     test.fixme("5. user closes the popup before consenting → false within ~9s", async () => {});
     test.fixme("6. provider sends COOP same-origin (e.g. Calendly): completing consent → true; abandoning → false only at timeout", async () => {});
-    test.fixme("7. short timeout with no user action → the popup closes and the result is false", async () => {});
-    test.fixme("8. aborting through an AbortSignal → false and the popup closes", async () => {});
+    // Verified live: a short timeout with no user action opens the authorize popup, then the SDK
+    // times out, closes it (autoClose) and resolves false. Needs only the authorize URL — no login.
+    test("7. short timeout with no user action → resolves false and the popup closes", async ({ page }) => {
+        await openHarness(page);
+        const [popup, result] = await Promise.all([
+            page.waitForEvent("popup"),
+            connectInPage(page, { slug: SLUG, site: SITE, timeout: 2500 }),
+        ]);
+        expect(result).toEqual({ ok: true, value: false });
+        await expectPopupClosed(popup);
+    });
+
+    // Verified live: timeout 0 (wait forever) + an AbortSignal fired after the popup opens → the SDK
+    // gives up, closes the popup and resolves false. The only way out of an abandoned wait.
+    test("8. aborting through an AbortSignal → false and the popup closes", async ({ page }) => {
+        await openHarness(page);
+        const [popup, result] = await Promise.all([
+            page.waitForEvent("popup"),
+            connectInPage(page, { slug: SLUG, site: SITE, timeout: 0, abortAfterMs: 1000 }),
+        ]);
+        expect(result).toEqual({ ok: true, value: false });
+        await expectPopupClosed(popup);
+    });
 
     // Verified live on UAT: the SDK forwards a flat pre-requisite field to /integrate and opens the
     // authorize URL the server returns. NOTE: the ticket's "the field appears in the authorize URL"
