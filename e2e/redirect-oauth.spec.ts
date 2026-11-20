@@ -8,8 +8,10 @@ import { mintSessionToken } from "./harness/refold-admin";
  * completing consent). Cases 1–8 need a provider test account (see e2e/README.md) and stay fixme.
  */
 const cfg = loadConfig();
-const SLUG = "confluence"; // platform OAuth creds on UAT; required flat field site_name
-const SITE = "acme-qa-test";
+const SLUG = process.env.JIRA_CONNECT_SLUG || "jira"; // platform OAuth creds on UAT; required flat field site_name
+// Any site_name yields an authorize URL (what the Tier-1 cases need); the real site matters only for
+// the consent cases. Falls back to a placeholder when JIRA_SITE_NAME is unset.
+const SITE = process.env.JIRA_SITE_NAME || "acme-qa-test";
 
 /** Mint a fresh session token and open the harness page pointed at the target. */
 async function openHarness(page: Page): Promise<void> {
