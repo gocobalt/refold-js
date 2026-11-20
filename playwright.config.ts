@@ -30,7 +30,10 @@ export default defineConfig({
         env: { E2E_PORT: String(PORT) },
     },
     projects: [
-        { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-        { name: "webkit", use: { ...devices["Desktop Safari"] } },
+        // Atlassian login that saves storageState for the consent cases. Run explicitly:
+        //   npx playwright test --project=login --headed
+        { name: "login", testMatch: /jira\.login\.setup\.ts/, use: { ...devices["Desktop Chrome"] } },
+        { name: "chromium", testIgnore: /jira\.login\.setup\.ts/, use: { ...devices["Desktop Chrome"] } },
+        { name: "webkit", testIgnore: /jira\.login\.setup\.ts/, use: { ...devices["Desktop Safari"] } },
     ],
 });
