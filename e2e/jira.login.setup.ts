@@ -25,6 +25,9 @@ function required(key: string): string {
 }
 
 setup("atlassian provider login", async ({ page }) => {
+    // Parked by default: the consent cases need a QA-owned provider account (see file header). This
+    // login only runs when explicitly opted in, so it never false-passes or fails the normal suite.
+    setup.skip(!process.env.RUN_CONSENT, "parked: set RUN_CONSENT=1 once QA owns an automatable provider account");
     setup.setTimeout(180_000); // headed login may need a human to clear MFA / device verification
     const email = required("ATLASSIAN_EMAIL");
     const password = required("ATLASSIAN_PASSWORD");
