@@ -10,6 +10,7 @@ e2e/harness/build.mjs     esbuild: refold.ts → e2e/harness/refold.global.js (w
 e2e/harness/serve.mjs     zero-dependency static server for e2e/harness/ (Playwright webServer builds first)
 e2e/harness/index.html    loads the bundle, constructs Refold from query params, wires a Connect button
 e2e/harness/env.ts        loads e2e/.env; e2e/harness/refold-admin.ts mints tokens / lists / disconnects
+e2e/harness/consent.ts    shared consent helpers (startConnect / grant / awaitResult / connectWithConsent)
 playwright.config.ts      chromium + webkit; serial (shared linked account)
 ```
 
@@ -36,7 +37,7 @@ npm run test:e2e
 npm run typecheck:e2e
 ```
 
-### The redirect-consent cases (1–6)
+### The redirect-consent cases (1–6) + multi-auth re-auth (17) & lifecycle disconnect/reconnect (21)
 
 These complete a **real Jira OAuth consent** in the popup, so they need a logged-in Atlassian session
 and are gated behind `RUN_CONSENT=1`. One-time setup below, then:
@@ -47,7 +48,7 @@ RUN_CONSENT=1 npx playwright test --project=login --headed
 
 # 2) run the consent specs BY PATH (not `npm run test:e2e`, which would re-run login and overwrite
 #    the saved session)
-RUN_CONSENT=1 npx playwright test e2e/redirect-consent.spec.ts
+RUN_CONSENT=1 npx playwright test e2e/redirect-consent.spec.ts e2e/multi-auth.spec.ts e2e/session-lifecycle.spec.ts
 ```
 
 ## One-time consent setup — bring-your-own OAuth app
@@ -76,9 +77,8 @@ app, wired as Jira's **default auth profile**. The `ATLASSIAN_EMAIL` account mus
 
 ## What's implemented vs blocked
 
-Implemented & green on UAT: **1, 2, 4, 5, 7, 8, 9, 13, 14** + harness smoke. Still fixme:
+Implemented & green on UAT: **1, 2, 4, 5, 7, 8, 9, 13, 14, 17, 21** + harness smoke. Still fixme:
 3 (PKCE app), 6 (COOP provider), 10/11/12 (Playwright doesn't block gesture-less popups), 15 (DEV-7912),
-16/18 (need a second Jira site for two distinct connections), 17/21 (multi-auth re-auth &
-disconnect/reconnect — land in #22), 19 (`/connect/<code>` minting), 20 (`getToken` 401-retry),
-22 (dual-auth app). Caveats on 9 (field is in the encrypted `state`, not the URL; flat only) and
-13 (Auth0 is keybased on UAT, so it exercises the keybased path, not `grantType`).
+16/18 (need a second Jira site for two distinct connections), 19 (`/connect/<code>` minting), 20
+(`getToken` 401-retry), 22 (dual-auth app). Caveats on 9 (field is in the encrypted `state`, not the
+URL; flat only) and 13 (Auth0 is keybased on UAT, so it exercises the keybased path, not `grantType`).
