@@ -1,17 +1,15 @@
 import { test as setup } from "@playwright/test";
 
 /**
- * BLOCKED (2026-11-20): the Atlassian account available to QA enforces OTP that QA does not control
- * (it's a shared integrations account QA doesn't own), so this login can't be driven and the
- * redirect-consent cases (1–6, 16–17) stay fixme. This setup is ready for when QA owns a provider
- * account whose login is automatable (2FA off, or a TOTP seed in ATLASSIAN_TOTP_SECRET).
+ * Logs into Atlassian ONCE and saves the browser session (storageState), so the redirect-consent
+ * cases reuse it instead of logging in every run. After login it also visits the Jira site so the
+ * session carries the site context the OAuth consent needs. One Atlassian account covers Jira + Confluence.
  *
- * Logs into Atlassian ONCE and saves the browser session (storageState), so the consent cases reuse
- * it instead of logging in every run — the pattern that keeps provider-login suites off the MFA /
- * bot-detection hot path. One Atlassian account covers both Jira and Confluence.
+ * Consent uses a BRING-YOUR-OWN published OAuth app (Refold's own UAT apps are dev-mode / owner-only).
+ * The ATLASSIAN_EMAIL account must OWN that app and the JIRA_SITE_NAME site. See e2e/README.md.
  *
- * First run headed, so a human can clear any MFA / new-device check:
- *   npx playwright test --config=playwright.config.ts --project=login --headed
+ * First run headed, so a human can clear any one-time device check:
+ *   RUN_CONSENT=1 npx playwright test --project=login --headed
  * The saved state then carries that trust; later runs can go headless until it expires.
  */
 setup.use({ trace: "off", screenshot: "off", video: "off" });
@@ -56,6 +54,15 @@ setup("atlassian provider login", async ({ page }) => {
     ]);
     if (outcome === "bad-creds") {
         throw new Error(`Atlassian rejected the credentials for ${email}. Check ATLASSIAN_EMAIL / ATLASSIAN_PASSWORD in e2e/.env.`);
+    }
+
+    // Warm the Jira site session while the login is live, so storageState carries the site context the
+    // OAuth consent needs. Logging into id.atlassian.com alone leaves the consent reporting "no access".
+    const site = process.env.JIRA_SITE_NAME;
+    if (site) {
+        await page.goto(`https://${site}.atlassian.net/jira`, { waitUntil: "domcontentloaded" }).catch(() => { /* SSO redirect chain */ });
+        await page.waitForURL((u) => u.href.includes(`${site}.atlassian.net`), { timeout: 60_000 }).catch(() => { /* best effort */ });
+        await page.waitForTimeout(4000);
     }
 
     await page.context().storageState({ path: `.auth/atlassian-${TARGET}.json` });

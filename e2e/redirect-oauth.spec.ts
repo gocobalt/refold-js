@@ -44,12 +44,9 @@ function connectInPage(page: Page, opts: ConnectOpts): Promise<ConnectOutcome> {
 }
 
 test.describe("redirect OAuth connect flow", () => {
-    test.fixme("1. happy path: Connect → popup → consent → callback → popup closes → connect() resolves true; account active", async () => {});
-    test.fixme("2. autoClose:false → resolves true and the popup stays open", async () => {});
-    test.fixme("3. a PKCE-grant app or connector → same result as case 1", async () => {});
-    test.fixme("4. user denies consent → no account created; closing the popup resolves false within ~9s", async () => {});
-    test.fixme("5. user closes the popup before consenting → false within ~9s", async () => {});
-    test.fixme("6. provider sends COOP same-origin (e.g. Calendly): completing consent → true; abandoning → false only at timeout", async () => {});
+    // Cases 1–6 (real provider consent) live in redirect-consent.spec.ts — they need a logged-in
+    // provider session (HubSpot storageState) and the RUN_CONSENT gate.
+
     // Verified live: a short timeout with no user action opens the authorize popup, then the SDK
     // times out, closes it (autoClose) and resolves false. Needs only the authorize URL — no login.
     test("7. short timeout with no user action → resolves false and the popup closes", async ({ page }) => {
