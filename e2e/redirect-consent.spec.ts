@@ -18,7 +18,7 @@ const SITE = process.env.JIRA_SITE_NAME || "";
 const stateExists = fs.existsSync(ATLASSIAN_STATE);
 
 test.describe("redirect OAuth consent (Jira)", () => {
-    test.skip(!process.env.RUN_CONSENT || !stateExists, "set RUN_CONSENT=1 and run `--project=login` first");
+    test.skip(!process.env.RUN_CONSENT || !stateExists || !cfg.apiKey, "set RUN_CONSENT=1, REFOLD_API_KEY, and run `--project=login` first");
     test.use({ storageState: stateExists ? ATLASSIAN_STATE : undefined });
 
     test.beforeEach(async () => { await disconnectAll(cfg, SLUG); }); // clean slate (jira is multi-auth)
@@ -39,16 +39,16 @@ test.describe("redirect OAuth consent (Jira)", () => {
 
     /** Poll the page for connect()'s stored result. */
     function awaitResult(page: Page): Promise<{ ok: true; value: boolean } | { ok: false; error: string }> {
-        return page.evaluate(() => new Promise((res) => {
+        return page.evaluate(() => new Promise<{ ok: true; value: boolean } | { ok: false; error: string }>((res) => {
             const started = Date.now();
             const check = () => {
-                const r = (window as unknown as { __connectResult?: unknown }).__connectResult;
+                const r = (window as unknown as { __connectResult?: { ok: true; value: boolean } | { ok: false; error: string } }).__connectResult;
                 if (r !== undefined) return res(r);
                 if (Date.now() - started > 90_000) return res({ ok: false, error: "timeout waiting for connect()" });
                 setTimeout(check, 200);
             };
             check();
-        })) as Promise<{ ok: true; value: boolean } | { ok: false; error: string }>;
+        }));
     }
 
     /** Complete Atlassian's consent in the popup (signed in via storageState; site pre-selected). */
@@ -89,7 +89,9 @@ test.describe("redirect OAuth consent (Jira)", () => {
         await startConnect(page);
         const popup = await popupPromise;
         await popup.getByRole("button", { name: /^cancel$/i }).click({ timeout: 30_000 });
-        await popup.waitForTimeout(2000).catch(() => { /* popup may have navigated to the callback */ });
+        // The SDK trusts `closed` only after its first poll (POLL_INTERVAL = 3s) has seen the handle
+        // alive; wait past that before closing, or the close is ignored and connect() waits 3 min.
+        await popup.waitForTimeout(3500).catch(() => { /* popup may have navigated to the callback */ });
         if (!popup.isClosed()) await popup.close();
         const result = await awaitResult(page);
         expect(result).toEqual({ ok: true, value: false });
@@ -101,8 +103,10 @@ test.describe("redirect OAuth consent (Jira)", () => {
         const popupPromise = page.waitForEvent("popup");
         await startConnect(page);
         const popup = await popupPromise;
-        // Let the consent page render (so the SDK's poll sees the handle alive) before closing it.
+        // The SDK trusts `closed` only after its first poll (POLL_INTERVAL = 3s) has seen the handle
+        // alive; wait past that before closing, or the close is ignored and connect() waits 3 min.
         await popup.getByRole("button", { name: /^accept$/i }).waitFor({ state: "visible", timeout: 30_000 }).catch(() => { /* best effort */ });
+        await popup.waitForTimeout(3500);
         await popup.close();
         const result = await awaitResult(page);
         expect(result).toEqual({ ok: true, value: false });

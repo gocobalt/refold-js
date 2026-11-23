@@ -11,7 +11,13 @@ const TYPES = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/ja
 
 createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", `http://localhost:${PORT}`);
-    let path = normalize(decodeURIComponent(url.pathname));
+    let path;
+    try {
+        path = normalize(decodeURIComponent(url.pathname)); // a malformed % escape throws — answer 400, don't crash
+    } catch {
+        res.writeHead(400).end("bad request");
+        return;
+    }
     if (path === "/" || path === "\\") path = "/index.html";
     const file = join(root, path);
     if (!file.startsWith(root)) {

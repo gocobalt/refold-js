@@ -1,58 +1,84 @@
 # End-to-end connect tests (DEV-7914)
 
-Real-browser tests of the SDK's `connect()` flow — popups, provider consent, callbacks and polling —
-which the unit suite (`refold.test.mjs`, DEV-7913) can't cover.
-
-> **Status: scaffold.** The harness is in place and all 22 cases from DEV-7914 are laid out as
-> `test.fixme` stubs, grouped per the ticket. Only `harness.spec.ts` (a provider-free smoke check
-> that the SDK bundle loads in the page) is meant to run green today. Filling in the 22 cases needs a
-> provider app + test account wired (see "Picking a provider" below) — chosen deliberately as a
-> follow-up, so this PR is the foundation, not the coverage.
-
-## How it works
-
-The published package is CommonJS and can't be `import`ed in a page, so the harness **bundles the SDK
-into a browser global** and loads it in a host page:
+Real-browser Playwright tests of the SDK's `connect()` flow — popups, provider consent, callbacks and
+polling — which the unit suite (`refold.test.mjs`, DEV-7913) can't cover. They drive the **actual SDK**:
+the harness bundles `refold.ts` into a browser global (esbuild) and loads it in a host page that calls
+`refold.connect()` on a real click, on chromium + webkit, against live UAT.
 
 ```
-e2e/harness/build.mjs   esbuild: refold.ts → e2e/harness/refold.global.js (window.RefoldSDK.Refold)
-e2e/harness/index.html  loads the bundle, constructs Refold from query params, wires a Connect button
-e2e/harness/serve.mjs   zero-dependency static server for e2e/harness/ (Playwright webServer)
-playwright.config.ts    chromium + webkit; serves the harness; serial (shared linked account)
+e2e/harness/build.mjs     esbuild: refold.ts → e2e/harness/refold.global.js (window.RefoldSDK.Refold)
+e2e/harness/serve.mjs     zero-dependency static server for e2e/harness/ (Playwright webServer builds first)
+e2e/harness/index.html    loads the bundle, constructs Refold from query params, wires a Connect button
+e2e/harness/env.ts        loads e2e/.env; e2e/harness/refold-admin.ts mints tokens / lists / disconnects
+playwright.config.ts      chromium + webkit; serial (shared linked account)
 ```
 
-A **real click** on the Connect button is a trusted user gesture, so `window.open` isn't
-popup-blocked — essential for the "Popup activation" cases. Tests set `window.__connectParams` before
-clicking; the no-gesture case (12) calls `window.__refold.connect()` from `page.evaluate` instead.
+## Setup
 
-The host page reads `?baseUrl=`, `?token=`, `?code=` and `?slug=` so a test can point the SDK at a
-target and authenticate with a minted session token or a `/connect/<code>`.
+```bash
+npm install
+npx playwright install chromium webkit
+cp e2e/.env.example e2e/.env   # then fill it in
+```
+
+`e2e/.env` keys (see `.env.example`): `REFOLD_API_KEY` (all real cases), `JIRA_SITE_NAME` (case 9 +
+consent), `MONDAY_API_KEY` (14b), `AUTH0_*` (13), and for the consent cases `ATLASSIAN_EMAIL/PASSWORD`
++ `JIRA_OAUTH_CLIENT_ID/SECRET`.
 
 ## Running
 
 ```bash
-npm install                 # brings in @playwright/test + esbuild (devDeps)
-npx playwright install      # browser binaries (chromium, webkit)
-npm run test:e2e            # builds the bundle, then runs Playwright
+# No-login set — no provider account needed (harness smoke + 7, 8, 9, 13, 14). Skips cleanly if
+# e2e/.env is absent.
+npm run test:e2e
+
+# Type-check the e2e sources (the main build only compiles refold.ts):
+npm run typecheck:e2e
 ```
 
-## Picking a provider (to un-fixme the cases)
+### The redirect-consent cases (1–6)
 
-The cases split by what they need:
+These complete a **real Jira OAuth consent** in the popup, so they need a logged-in Atlassian session
+and are gated behind `RUN_CONSENT=1`. One-time setup below, then:
 
-- **No provider login** — case 9 (inspect the authorize URL), 4/5/7/8 (open the popup, then
-  abandon/deny/timeout/abort), 12 (POPUP_BLOCKED). These only need a target app whose authorize URL
-  Refold can build (e.g. Confluence on UAT already has platform OAuth creds).
-- **Provider login required** — cases 1, 3, 13, 14, 16, 17, 21, where the connection must actually
-  become active. These need a real provider test account (and, for a custom OAuth app, a registered
-  callback). Reuse the `storageState` login-amortization pattern to avoid MFA on the hot path.
+```bash
+# 1) one-time, headed — log into Atlassian and save the session (.auth/atlassian-<target>.json)
+RUN_CONSENT=1 npx playwright test --project=login --headed
 
-Recommended first target: **Confluence / Atlassian** — Refold builds a real `auth.atlassian.com`
-URL without us registering an OAuth app; only an Atlassian test account + site is needed for the
-login-required cases.
+# 2) run the consent specs BY PATH (not `npm run test:e2e`, which would re-run login and overwrite
+#    the saved session)
+RUN_CONSENT=1 npx playwright test e2e/redirect-consent.spec.ts
+```
 
-## Dependencies
+## One-time consent setup — bring-your-own OAuth app
 
-- Case 15 depends on the SDK fix in **DEV-7912** (explicit key-based types with no payload → `/save`).
-- **DEV-7912** also wires `npm test` into CI; a Playwright CI job for this suite should be added
-  alongside that, not here, to keep CI ownership in one place.
+Refold's own UAT OAuth apps are in **development mode**, so only their owner can grant them and no
+external test account can complete consent. So consent uses a **QA-owned, published** Atlassian OAuth
+app, wired as Jira's **default auth profile**. The `ATLASSIAN_EMAIL` account must OWN that app and the
+`JIRA_SITE_NAME` Jira site.
+
+1. **Atlassian** (developer.atlassian.com/console/myapps → OAuth 2.0 integration):
+   - Permissions → Jira API → scopes `read:jira-work`, `write:jira-work`, `read:jira-user`.
+   - Authorization → OAuth 2.0 (3LO) → Callback URL `https://uat.refold.ai/api/v1/jira/callback`.
+   - **Distribution → Sharing: On** (this is what lifts the owner-only restriction).
+   - Settings → copy Client ID + Secret into `JIRA_OAUTH_CLIENT_ID` / `JIRA_OAUTH_CLIENT_SECRET`.
+2. **Refold** — create a default Jira auth profile pointing at that app (org-scope, so `x-api-key`
+   only, no session token):
+   ```
+   POST {REFOLD_BASE_URL}/api/v2/public/auth-profile/jira
+     headers: x-api-key, environment, cobalt-internal: true
+     body: { "name": "e2e-byo-jira", "auth_type": "oauth2",
+             "oauth2": { "client_id": "...", "client_secret": "...", "grant_type": "authorization_code" } }
+   POST {REFOLD_BASE_URL}/api/v2/public/auth-profile/jira/{id}/default
+   ```
+   `GET {REFOLD_BASE_URL}/api/v1/jira/integrate` should then return an authorize URL whose `client_id`
+   is your app's. Delete the profile to revert Jira to the platform app.
+
+## What's implemented vs blocked
+
+Implemented & green on UAT: **1, 2, 4, 5, 7, 8, 9, 13, 14** + harness smoke. Still fixme:
+3 (PKCE app), 6 (COOP provider), 10/11/12 (Playwright doesn't block gesture-less popups), 15 (DEV-7912),
+16/18 (need a second Jira site for two distinct connections), 17/21 (multi-auth re-auth &
+disconnect/reconnect — land in #22), 19 (`/connect/<code>` minting), 20 (`getToken` 401-retry),
+22 (dual-auth app). Caveats on 9 (field is in the encrypted `state`, not the URL; flat only) and
+13 (Auth0 is keybased on UAT, so it exercises the keybased path, not `grantType`).

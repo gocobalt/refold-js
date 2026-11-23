@@ -3,9 +3,9 @@ import { loadConfig } from "./harness/env";
 import { mintSessionToken } from "./harness/refold-admin";
 
 /**
- * DEV-7914 — Redirect OAuth (cases 1–9). Real browser, real popup, real provider consent.
- * Case 9 is implemented (Tier-1: needs only the API key — it inspects the authorize URL without
- * completing consent). Cases 1–8 need a provider test account (see e2e/README.md) and stay fixme.
+ * DEV-7914 — Redirect OAuth, no-login cases (7, 8, 9). Real browser + real popup, but these need only
+ * the authorize URL — no provider consent — so they run without a login. Cases 1–6 (real consent) live
+ * in redirect-consent.spec.ts.
  */
 const cfg = loadConfig();
 const SLUG = process.env.JIRA_CONNECT_SLUG || "jira"; // platform OAuth creds on UAT; required flat field site_name
@@ -44,8 +44,9 @@ function connectInPage(page: Page, opts: ConnectOpts): Promise<ConnectOutcome> {
 }
 
 test.describe("redirect OAuth connect flow", () => {
+    test.skip(!cfg.apiKey, "set REFOLD_API_KEY in e2e/.env");
     // Cases 1–6 (real provider consent) live in redirect-consent.spec.ts — they need a logged-in
-    // provider session (HubSpot storageState) and the RUN_CONSENT gate.
+    // Atlassian session (storageState) and the RUN_CONSENT gate.
 
     // Verified live: a short timeout with no user action opens the authorize popup, then the SDK
     // times out, closes it (autoClose) and resolves false. Needs only the authorize URL — no login.
@@ -73,10 +74,10 @@ test.describe("redirect OAuth connect flow", () => {
 
     // Verified live on UAT: the SDK forwards a flat pre-requisite field to /integrate and opens the
     // authorize URL the server returns. NOTE: the ticket's "the field appears in the authorize URL"
-    // does NOT hold for Confluence — its site_name is carried in the encrypted `state`, not in the
-    // visible query. Asserting the field literally in the URL needs an app that surfaces it there
-    // (e.g. a subdomain-style field); that variant, and the nested pre_requisite_fields form, are
-    // left for when such an app is wired (see e2e/README.md).
+    // does NOT hold for Jira — its site_name is carried in the encrypted `state`, not in the visible
+    // query. Asserting the field literally in the URL needs an app that surfaces it there (e.g. a
+    // subdomain-style field); that variant, and the nested pre_requisite_fields form, are left for
+    // when such an app is wired (see e2e/README.md).
     test("9. forwards a flat pre-requisite field to /integrate and opens the provider authorize URL", async ({ page }) => {
         const token = await mintSessionToken(cfg);
 
@@ -108,7 +109,7 @@ test.describe("redirect OAuth connect flow", () => {
         // The server returned a real provider authorize URL and the SDK opened it (for this slug).
         expect(openedUrl, "SDK did not open an authorize URL").toBeTruthy();
         expect(openedUrl).toMatch(/^https:\/\//);
-        // The callback rides in the URL-encoded redirect_uri (…%2Fconfluence%2Fcallback), so decode.
+        // The callback rides in the URL-encoded redirect_uri (…%2Fjira%2Fcallback), so decode.
         expect(decodeURIComponent(openedUrl!)).toContain(`/${SLUG}/callback`);
     });
 });

@@ -24,7 +24,7 @@ function auth0Payload(): Record<string, string> | undefined {
     return { client_id, client_secret, base_url };
 }
 
-type Outcome = { ok: true; value: boolean } | { ok: false; error: string };
+type Outcome = { ok: true; value: boolean } | { ok: false; status?: number; code?: string; message: string };
 
 async function connectKeybased(page: Page, token: string, slug: string, payload: Record<string, string>): Promise<Outcome> {
     await page.goto(`/?baseUrl=${encodeURIComponent(cfg.baseURL)}&token=${encodeURIComponent(token)}`);
@@ -32,13 +32,15 @@ async function connectKeybased(page: Page, token: string, slug: string, payload:
         const refold = (window as unknown as { __refold: { connect: (p: unknown) => Promise<boolean> } }).__refold;
         try { return { ok: true as const, value: await refold.connect({ slug, type: "keybased", payload }) }; }
         catch (e) {
-            const err = e as { message?: string; error?: string };
-            return { ok: false as const, error: err?.message ?? err?.error ?? JSON.stringify(e) };
+            // The SDK throws the server's parsed error body ({ status_code, error, message, ... }).
+            const err = e as { status_code?: number; error?: string; message?: string };
+            return { ok: false as const, status: err?.status_code, code: err?.error, message: err?.message ?? JSON.stringify(e) };
         }
     }, { slug, payload });
 }
 
 test.describe("other connect types", () => {
+    test.skip(!cfg.apiKey, "set REFOLD_API_KEY in e2e/.env");
     const AUTH0 = auth0Payload();
 
     test("13. client-credentials connector (Auth0) → no popup, result true, account active", async ({ page }) => {
@@ -57,8 +59,13 @@ test.describe("other connect types", () => {
     test("14a. key-based with bad credentials → the server's error reaches the page", async ({ page }) => {
         const token = await mintSessionToken(cfg);
         const result = await connectKeybased(page, token, "monday", { api_token: "invalid-token-xxxxxxxx" });
-        // The SDK throws the server's parsed error; connect() must not report success.
-        expect(result.ok, `expected an error to reach the page, got ${JSON.stringify(result)}`).toBe(false);
+        // Must be the server's credential REJECTION (a 4xx), not merely that something threw — a 5xx,
+        // a renamed slug, or a network error must not pass as "bad credentials".
+        expect(result.ok, `expected a rejection, got ${JSON.stringify(result)}`).toBe(false);
+        if (!result.ok) {
+            expect(result.status, `expected a 4xx credential error, got ${JSON.stringify(result)}`).toBeGreaterThanOrEqual(400);
+            expect(result.status!).toBeLessThan(500);
+        }
     });
 
     test("14b. key-based with valid credentials → true and the account is active", async ({ page }) => {

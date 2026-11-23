@@ -10,7 +10,8 @@
     "docs:llms": "npx typedoc refold.ts --plugin typedoc-plugin-markdown --mergeReadme --enumMembersFormat table --parametersFormat table --propertiesFormat table --typeDeclarationFormat table --indexFormat table --outputFileStrategy modules --cleanOutputDir false --fileExtension .txt --out docs --entryFileName llms",
     "test": "npm run build && node --test",
     "e2e:build": "node e2e/harness/build.mjs",
-    "test:e2e": "npm run e2e:build && playwright test"
+    "test:e2e": "npm run e2e:build && playwright test",
+    "typecheck:e2e": "tsc -p e2e/tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,7 @@
   "homepage": "https://github.com/gocobalt/refold-js#readme",
   "devDependencies": {
     "@playwright/test": "^1.52.0",
+    "@types/node": "^20.14.0",
     "esbuild": "^0.24.2",
     "typedoc": "^0.28.20",
     "typedoc-plugin-markdown": "^4.12.0",

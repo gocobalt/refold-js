@@ -24,14 +24,19 @@ export default defineConfig({
         trace: "off", // the authorize URL and tokens are sensitive; keep traces off
     },
     webServer: {
-        command: "node e2e/harness/serve.mjs",
+        // Rebuild the SDK bundle before serving, so running a spec directly (not just `npm run test:e2e`)
+        // never tests a stale or missing e2e/harness/refold.global.js.
+        command: "node e2e/harness/build.mjs && node e2e/harness/serve.mjs",
         url: `http://localhost:${PORT}`,
         reuseExistingServer: !process.env.CI,
         env: { E2E_PORT: String(PORT) },
     },
     projects: [
-        // Atlassian login that saves storageState for the consent cases. Run explicitly (first time headed):
+        // Atlassian login that saves storageState for the consent cases (skipped unless RUN_CONSENT=1, so
+        // it never runs in the default `npm run test:e2e`). Run it on its own, first time headed:
         //   RUN_CONSENT=1 npx playwright test --project=login --headed
+        // Then run the consent specs by path (NOT via `npm run test:e2e`, which would re-run login and
+        // overwrite the session): RUN_CONSENT=1 npx playwright test e2e/redirect-consent.spec.ts ...
         { name: "login", testMatch: /jira\.login\.setup\.ts/, use: { ...devices["Desktop Chrome"] } },
         { name: "chromium", testIgnore: /\.login\.setup\.ts/, use: { ...devices["Desktop Chrome"] } },
         { name: "webkit", testIgnore: /\.login\.setup\.ts/, use: { ...devices["Desktop Safari"] } },

@@ -27,21 +27,22 @@ export function loadDotEnv(): void {
 export interface E2EConfig {
     baseURL: string;
     environment: string;
+    /** May be "" when e2e/.env is absent — connect specs skip on it; the harness smoke needs no creds. */
     apiKey: string;
     linkedAccount: string;
-    connectSlug?: string;
 }
 
-/** Reads the e2e config (loading e2e/.env first). Throws clearly if the API key is missing. */
+/**
+ * Reads the e2e config (loading e2e/.env first). Does NOT throw when the API key is missing — that
+ * would make every spec fail at import and `npm run test:e2e` run zero tests (harness smoke included).
+ * Connect specs skip on an empty apiKey; the functions that use it (mintSessionToken) fail loudly.
+ */
 export function loadConfig(): E2EConfig {
     loadDotEnv();
-    const apiKey = process.env.REFOLD_API_KEY;
-    if (!apiKey) throw new Error("REFOLD_API_KEY is not set — add it to e2e/.env (see e2e/.env.example).");
     return {
         baseURL: process.env.REFOLD_BASE_URL || "https://uat.refold.ai",
         environment: process.env.REFOLD_ENVIRONMENT || "test",
-        apiKey,
+        apiKey: process.env.REFOLD_API_KEY || "",
         linkedAccount: process.env.REFOLD_LINKED_ACCOUNT || "cobalt_test_user",
-        connectSlug: process.env.REFOLD_CONNECT_SLUG || undefined,
     };
 }

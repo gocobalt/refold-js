@@ -55,6 +55,10 @@ setup("atlassian provider login", async ({ page }) => {
     if (outcome === "bad-creds") {
         throw new Error(`Atlassian rejected the credentials for ${email}. Check ATLASSIAN_EMAIL / ATLASSIAN_PASSWORD in e2e/.env.`);
     }
+    if (outcome !== "ok") {
+        // Don't save an unauthenticated session — later consent runs would then fail at the Accept click.
+        throw new Error(`Atlassian login for ${email} didn't reach an app page (an MFA / device check may be uncleared). Re-run '--project=login --headed' and complete it.`);
+    }
 
     // Warm the Jira site session while the login is live, so storageState carries the site context the
     // OAuth consent needs. Logging into id.atlassian.com alone leaves the consent reporting "no access".
