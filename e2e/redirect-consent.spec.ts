@@ -1,7 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import fs from "node:fs";
 import { loadConfig } from "./harness/env";
-import { mintSessionToken, isConnected, disconnect } from "./harness/refold-admin";
+import { mintSessionToken, isConnected, disconnectAll } from "./harness/refold-admin";
 
 /**
  * DEV-7914 — redirect OAuth consent cases (1–6): complete a REAL provider consent in the popup.
@@ -21,8 +21,8 @@ test.describe("redirect OAuth consent (Jira)", () => {
     test.skip(!process.env.RUN_CONSENT || !stateExists, "set RUN_CONSENT=1 and run `--project=login` first");
     test.use({ storageState: stateExists ? ATLASSIAN_STATE : undefined });
 
-    test.beforeEach(async () => { await disconnect(cfg, SLUG); }); // clean slate
-    test.afterAll(async () => { await disconnect(cfg, SLUG); });
+    test.beforeEach(async () => { await disconnectAll(cfg, SLUG); }); // clean slate (jira is multi-auth)
+    test.afterAll(async () => { await disconnectAll(cfg, SLUG); });
 
     /** Kick off connect() in the page without awaiting (it only resolves after consent completes). */
     async function startConnect(page: Page, extra: Record<string, unknown> = {}): Promise<void> {
@@ -68,9 +68,47 @@ test.describe("redirect OAuth consent (Jira)", () => {
         await expect.poll(() => isConnected(cfg, SLUG), { timeout: 20_000, intervals: [1000, 2000, 3000] }).toBe(true);
     });
 
-    test.fixme("2. autoClose:false → resolves true and the popup stays open", async () => {});
+    test("2. autoClose:false → resolves true and the popup stays open", async ({ page }) => {
+        test.setTimeout(120_000);
+        const popupPromise = page.waitForEvent("popup");
+        await startConnect(page, { autoClose: false });
+        const popup = await popupPromise;
+        await grant(popup);
+        const result = await awaitResult(page);
+        expect(result).toEqual({ ok: true, value: true });
+        expect(popup.isClosed(), "popup should stay open with autoClose:false").toBe(false);
+        await popup.close(); // cleanup
+    });
+
+    // Needs a PKCE-grant app/connector (Jira is authorization_code) + its own published OAuth app.
     test.fixme("3. a PKCE-grant app → same result as case 1", async () => {});
-    test.fixme("4. user denies consent → no account created; closing the popup resolves false within ~9s", async () => {});
-    test.fixme("5. user closes the popup before consenting → false within ~9s", async () => {});
+
+    test("4. user denies consent → no account created; closing the popup resolves false", async ({ page }) => {
+        test.setTimeout(120_000);
+        const popupPromise = page.waitForEvent("popup");
+        await startConnect(page);
+        const popup = await popupPromise;
+        await popup.getByRole("button", { name: /^cancel$/i }).click({ timeout: 30_000 });
+        await popup.waitForTimeout(2000).catch(() => { /* popup may have navigated to the callback */ });
+        if (!popup.isClosed()) await popup.close();
+        const result = await awaitResult(page);
+        expect(result).toEqual({ ok: true, value: false });
+        expect(await isConnected(cfg, SLUG)).toBe(false);
+    });
+
+    test("5. user closes the popup before consenting → false", async ({ page }) => {
+        test.setTimeout(120_000);
+        const popupPromise = page.waitForEvent("popup");
+        await startConnect(page);
+        const popup = await popupPromise;
+        // Let the consent page render (so the SDK's poll sees the handle alive) before closing it.
+        await popup.getByRole("button", { name: /^accept$/i }).waitFor({ state: "visible", timeout: 30_000 }).catch(() => { /* best effort */ });
+        await popup.close();
+        const result = await awaitResult(page);
+        expect(result).toEqual({ ok: true, value: false });
+        expect(await isConnected(cfg, SLUG)).toBe(false);
+    });
+
+    // Needs a provider that sends Cross-Origin-Opener-Policy: same-origin (e.g. Calendly) + its own app.
     test.fixme("6. provider sends COOP same-origin → completing consent true; abandoning false at timeout", async () => {});
 });

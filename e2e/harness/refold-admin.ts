@@ -48,3 +48,22 @@ export async function disconnect(cfg: E2EConfig, slug: string, linkedAccount = c
     });
     return res.status;
 }
+
+/**
+ * Remove EVERY connection for a slug, one by one by connection_id — needed for a multi-auth app
+ * (e.g. jira), where disconnecting without a connection_id is refused (400) and connections pile up.
+ * Uses the SDK's own route: DELETE /api/v1/linked-acc/integration/:slug?connection_id=.
+ */
+export async function disconnectAll(cfg: E2EConfig, slug: string, linkedAccount = cfg.linkedAccount): Promise<void> {
+    const token = await mintSessionToken(cfg, linkedAccount);
+    const mine = (await listConnections(cfg, linkedAccount))
+        .filter((i) => [i.type, i.app_id, i.name, i.slug].some((v) => String(v ?? "").includes(slug)));
+    for (const i of mine) {
+        const cid = i.connection_id;
+        const q = cid ? `?connection_id=${encodeURIComponent(String(cid))}` : "";
+        await fetch(`${cfg.baseURL}/api/v1/linked-acc/integration/${encodeURIComponent(slug)}${q}`, {
+            method: "DELETE",
+            headers: { ...headers(cfg), authorization: `Bearer ${token}` },
+        }).catch(() => { /* best effort cleanup */ });
+    }
+}
