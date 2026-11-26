@@ -47,8 +47,16 @@ npm run typecheck:e2e
   the no-login set (7, 8, 9, 13, 14) against UAT. Secrets come from the **`uat-e2e`** GitHub Environment
   (`REFOLD_API_KEY`, `JIRA_SITE_NAME`, `MONDAY_API_KEY`, `AUTH0_CLIENT_ID/SECRET/BASE_URL`). Optional
   environment variables `REFOLD_BASE_URL`, `REFOLD_ENVIRONMENT` and `REFOLD_LINKED_ACCOUNT` override
-  the defaults. The run fails, instead of silently skipping, when `REFOLD_API_KEY` is missing. It
-  never runs on PRs: fork PRs get no secrets, and a UAT outage shouldn't block unrelated changes.
+  the defaults. The run fails, instead of silently skipping, when any of the secrets except
+  `JIRA_SITE_NAME` (which has a default) is missing. It never runs on PRs: fork PRs get no secrets,
+  and a UAT outage shouldn't block unrelated changes.
+  - Releases run it from a tag ref, so if `uat-e2e` restricts deployment branches it must also allow
+    release tags, or publishing is blocked.
+  - Runs share one concurrency group (one linked account), and GitHub keeps only one *pending* run
+    per group: a release's e2e waiting behind a running nightly is cancelled if a manual run is
+    queued too. The publish is then skipped; re-run the release workflow.
+  - No artifacts are uploaded on failure: the harness page URL carries a session token, and this
+    repo is public.
 - The consent cases are **not** in CI: an automated Atlassian login from CI runners is captcha-prone,
   and it would need a password for an account with 2FA off. Run them locally as below.
 

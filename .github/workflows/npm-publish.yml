@@ -18,6 +18,10 @@ jobs:
       - run: |
           npm ci
           npm test
+      # The tag must hold the refold.js that npm gets (CI checks this too, but a release can be cut
+      # from a commit whose CI didn't pass).
+      - name: Committed build is up to date
+        run: git diff --exit-code -- refold.js refold.d.ts
 
   # The live UAT connect cases must pass before a release goes out.
   e2e:
