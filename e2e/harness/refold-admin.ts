@@ -37,6 +37,21 @@ export async function listConnections(cfg: E2EConfig, linkedAccount = cfg.linked
     return data.integrations ?? [];
 }
 
+/** The app's connected accounts (connection_id / status / connectedAt) from getApp — case 17 reads connectedAt. */
+export async function connectionsOf(
+    cfg: E2EConfig,
+    slug: string,
+    linkedAccount = cfg.linkedAccount,
+): Promise<Array<{ connection_id?: string; status?: string; connectedAt?: unknown }>> {
+    const token = await mintSessionToken(cfg, linkedAccount);
+    const res = await fetch(`${cfg.baseURL}/api/v2/f-sdk/application/${encodeURIComponent(slug)}`, {
+        headers: { ...headers(cfg), authorization: `Bearer ${token}` },
+    });
+    const app = (await res.json().catch(() => ({}))) as { connected_accounts?: Array<{ connection_id?: string; status?: string; connectedAt?: unknown }> };
+    if (!res.ok) throw new Error(`getApp ${slug} failed: ${res.status}`);
+    return app.connected_accounts ?? [];
+}
+
 /** True when the linked account holds an ACTIVE connection for exactly this app slug. */
 export async function isConnected(cfg: E2EConfig, slug: string, linkedAccount = cfg.linkedAccount): Promise<boolean> {
     return (await listConnections(cfg, linkedAccount)).some((i) => i.type === slug && !i.reauth_required);
