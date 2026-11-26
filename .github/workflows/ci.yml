@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit tests, build and package checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+
+      # Builds refold.ts, then runs refold.test.mjs.
+      - run: npm test
+
+      # npm publishes the committed refold.js / refold.d.ts, so they must match refold.ts.
+      - name: Committed build is up to date
+        run: |
+          if ! git diff --exit-code -- refold.js refold.d.ts; then
+            echo "::error::refold.js / refold.d.ts are stale. Run 'npm run build' and commit the output."
+            exit 1
+          fi
+
+      - run: npm run typecheck:e2e
+
+      # Guards the package.json "files" allowlist: tests, e2e and tooling must never ship.
+      - name: Package contains only the SDK
+        run: |
+          npm pack --dry-run --json | node -e '
+            const files = JSON.parse(require("fs").readFileSync(0, "utf8"))[0].files.map(f => f.path);
+            const allowed = /^(refold\.js|refold\.d\.ts|README\.md|LICENSE|package\.json|skills\/refold-ui\/.+)$/;
+            const extra = files.filter(f => !allowed.test(f));
+            const missing = ["refold.js", "refold.d.ts"].filter(f => !files.includes(f));
+            if (extra.length || missing.length) {
+              if (extra.length) console.log("::error::Unexpected files in package: " + extra.join(", "));
+              if (missing.length) console.log("::error::Missing from package: " + missing.join(", "));
+              process.exit(1);
+            }
+            console.log("Package files:\n  " + files.join("\n  "));
+          '
+
+  e2e-smoke:
+    name: E2E harness smoke (chromium + webkit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      # No secrets here, so every live connect case skips and only the harness smoke test runs.
+      # The login project is left out because it is only for the consent cases.
+      - run: npx playwright test --project=chromium --project=webkit
