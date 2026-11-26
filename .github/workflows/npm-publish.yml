@@ -16,12 +16,20 @@ jobs:
         with:
           node-version: 24
       - run: |
-          echo 'NPM Token ${secrets.NPM_TOKEN}'
           npm ci
           npm test
+      # The tag must hold the refold.js that npm gets (CI checks this too, but a release can be cut
+      # from a commit whose CI didn't pass).
+      - name: Committed build is up to date
+        run: git diff --exit-code -- refold.js refold.d.ts
+
+  # The live UAT connect cases must pass before a release goes out.
+  e2e:
+    uses: ./.github/workflows/e2e-live.yml
+    secrets: inherit
 
   publish-npm:
-    needs: build
+    needs: [build, e2e]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -30,6 +38,8 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org/
       - run: npm ci
+      # Publish what refold.ts compiles to, not whatever build happens to be committed.
+      - run: npm run build
       - name: Publish
         run: |
           VERSION=$(node -p "require('./package.json').version")

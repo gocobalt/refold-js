@@ -1,0 +1,76 @@
+name: E2E (live UAT)
+
+# The no-login connect cases (7, 8, 9, 13, 14) against live UAT. They need secrets, so they run on
+# a schedule, on demand, and before every publish. They don't run on PRs: fork PRs get no secrets,
+# and a UAT or provider outage would block unrelated changes. The consent cases (RUN_CONSENT=1) need
+# a real Atlassian login and stay manual; see e2e/README.md.
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # daily, 03:00 UTC
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e-live:
+    name: Live connect cases (chromium + webkit)
+    runs-on: ubuntu-latest
+    environment: uat-e2e
+    # The cases share one linked account, so never let two runs overlap. Set on the job, not the
+    # workflow, so it also applies when npm-publish.yml calls this workflow.
+    concurrency:
+      group: e2e-live-uat
+      cancel-in-progress: false
+    timeout-minutes: 30
+    env:
+      REFOLD_BASE_URL: ${{ vars.REFOLD_BASE_URL || 'https://uat.refold.ai' }}
+      REFOLD_ENVIRONMENT: ${{ vars.REFOLD_ENVIRONMENT || 'test' }}
+      REFOLD_LINKED_ACCOUNT: ${{ vars.REFOLD_LINKED_ACCOUNT || 'cobalt_test_user' }}
+      REFOLD_API_KEY: ${{ secrets.REFOLD_API_KEY }}
+      JIRA_SITE_NAME: ${{ secrets.JIRA_SITE_NAME }}
+      MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+      AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+      AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+      AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
+    steps:
+      # The specs skip a case whose credentials are missing, so without this check the run (and the
+      # release gate) could pass having skipped cases.
+      - name: Require secrets
+        run: |
+          missing=""
+          for name in REFOLD_API_KEY MONDAY_API_KEY AUTH0_CLIENT_ID AUTH0_CLIENT_SECRET AUTH0_BASE_URL; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Not set on the uat-e2e environment:$missing. The cases that need them would skip."
+            exit 1
+          fi
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test --project=chromium --project=webkit
+
+  # A separate job so it also fires when e2e-live hits its timeout or is cancelled, which stops the
+  # job's own remaining steps.
+  notify:
+    needs: e2e-live
+    if: failure() || cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER: ${{ github.event_name }}
+        run: |
+          [ -n "$SLACK_WEBHOOK" ] || { echo "::warning::SLACK_WEBHOOK_URL is not set; no alert sent."; exit 0; }
+          payload=$(jq -n --arg url "$RUN_URL" --arg trigger "$TRIGGER" \
+            '{ text: (":x: *Live E2E failed* — refold-js (" + $trigger + ")\n<" + $url + "|View run>") }')
+          curl -fsS -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$payload"

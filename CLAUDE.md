@@ -15,6 +15,8 @@ npm run docs           # Generate TypeDoc HTML documentation
 npm run docs:llms      # Generate LLM-optimized markdown docs (docs/llms.txt)
 ```
 
+CI: `.github/workflows/ci.yml` runs on every PR (unit tests, stale-build check, `typecheck:e2e`, package-contents check, e2e harness smoke without secrets); `e2e-live.yml` runs the live UAT connect cases nightly, on demand and before every publish. See `e2e/README.md`.
+
 `npm test` builds and runs `refold.test.mjs` on Node's built-in runner (`node --test`) — no test framework, keeping the package dependency-free. No runtime dependencies.
 
 ## Build Output
