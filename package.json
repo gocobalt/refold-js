@@ -4,6 +4,11 @@
   "description": "Refold frontend SDK",
   "main": "./refold.js",
   "typings": "./refold.d.ts",
+  "files": [
+    "refold.js",
+    "refold.d.ts",
+    "skills/refold-ui"
+  ],
   "scripts": {
     "build": "tsc",
     "docs": "npx typedoc refold.ts",
